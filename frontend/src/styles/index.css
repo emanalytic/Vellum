@@ -1,0 +1,215 @@
+@import url("https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Permanent+Marker&family=Courier+Prime:wght@400;700&family=Gochi+Hand&family=Special+Elite&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sketch: "Patrick Hand", cursive;
+  --font-marker: "Permanent Marker", cursive;
+  --font-mono: "Courier Prime", monospace;
+  --font-hand: "Gochi Hand", cursive;
+  --font-type: "Special Elite", serif;
+
+  --color-paper-bg: #fdfbf7;
+  --color-ink: #1a1a1a;
+  --color-ink-light: #555555;
+  --color-highlighter-yellow: #fff01f;
+  --color-highlighter-pink: #ff99cc;
+  --color-highlighter-green: #a2f29c;
+  --color-highlighter-blue: #9cdcf2;
+  --color-highlighter-orange: #f2c69c;
+  --color-tape: rgba(255, 240, 31, 0.3);
+
+  --animate-spin-slow: spin 8s linear infinite;
+  --animate-bounce-slight: bounce-slight 2s ease-in-out infinite;
+
+  @keyframes bounce-slight {
+    0%, 100% { transform: translateY(0) rotate(3deg); }
+    50% { transform: translateY(-10px) rotate(-2deg); }
+  }
+}
+
+body {
+  background-color: var(--color-paper-bg);
+  background-image:
+    linear-gradient(#e5e5f7 1px, transparent 1px),
+    linear-gradient(90deg, #e5e5f7 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--color-ink);
+  font-family: var(--font-sketch);
+  overflow-x: hidden;
+}
+
+.tape-effect {
+  position: relative;
+}
+
+.tape-effect::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  width: 80px;
+  height: 24px;
+  background-color: var(--color-tape);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(1px);
+  z-index: 10;
+  border-left: 1px dashed rgba(0, 0, 0, 0.05);
+  border-right: 1px dashed rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-sketch {
+  border-right: 2px solid var(--color-ink);
+}
+
+/* Sketchy Borders */
+.sketch-border {
+  border: 2px solid var(--color-ink);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 2px 3px 0px 0px rgba(0, 0, 0, 0.8);
+  transition: all 0.2s ease-in-out;
+}
+
+.sketch-border:hover {
+  box-shadow: 4px 5px 0px 0px rgba(0, 0, 0, 0.8);
+}
+
+/* Only elevate on hover when it's an interactive card, not grid infrastructure */
+button.sketch-border:hover,
+a.sketch-border:hover,
+[role="button"].sketch-border:hover {
+  transform: translateY(-2px);
+}
+
+.marker-text {
+  font-family: var(--font-marker);
+  color: var(--color-ink);
+}
+
+.highlight {
+  background: linear-gradient(
+    120deg,
+    rgba(255, 240, 31, 0) 0%,
+    rgba(255, 240, 31, 0.5) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 40%;
+  background-position: 0 88%;
+}
+
+/* Realistic Highlighter Stroke */
+.highlighter-stroke {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  isolation: isolate;
+}
+
+.highlighter-stroke::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -8px;
+  bottom: 10%;
+  height: 60%;
+  background: var(--hl-color, var(--color-highlighter-yellow));
+  opacity: 0.5;
+  z-index: -1;
+  transform: rotate(-1deg) skewX(-15deg);
+  border-radius: 2px 8px 3px 12px;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 15%,
+    black 85%,
+    transparent
+  );
+  animation: highlight-draw 0.6s ease-out forwards;
+  transform-origin: left center;
+}
+
+@keyframes highlight-draw {
+  from {
+    transform: scaleX(0) rotate(-1.5deg) skewX(-15deg);
+  }
+  to {
+    transform: scaleX(1) rotate(-1deg) skewX(-15deg);
+  }
+}
+
+.doodle-guide {
+  position: absolute;
+  pointer-events: none;
+  font-family: var(--font-hand);
+  color: var(--color-ink);
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.dotted-arrow {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-bottom: 2px dotted var(--color-ink);
+  border-right: 2px dotted var(--color-ink);
+  transform: rotate(-45deg);
+  position: relative;
+}
+
+.dotted-arrow::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  border: 4px solid transparent;
+  border-top-color: var(--color-ink);
+  transform: rotate(45deg);
+}
+
+.circular-timer {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.circular-timer svg {
+  transform: rotate(-90deg);
+}
+
+.circular-timer circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.bg-circuit {
+  background-image: radial-gradient(var(--color-ink) 0.5px, transparent 0.5px);
+  background-size: 15px 15px;
+  opacity: 0.03;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink);
+  border-radius: 10px;
+  border: 2px solid var(--color-paper-bg);
+}
+
+.tab-active {
+  background: linear-gradient(
+    120deg,
+    rgba(255, 240, 31, 0) 0%,
+    rgba(255, 240, 31, 0.5) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 40%;
+  background-position: 0 88%;
+  padding: 0.25rem 1rem;
+  transform: scale(1.1) rotate(1deg);
+}
