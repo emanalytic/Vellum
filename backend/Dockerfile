@@ -1,8 +1,13 @@
 FROM node:18-alpine
 WORKDIR /app
-COPY package*.json ./
+
+# Copy from the backend folder specifically
+COPY backend/package*.json ./
 RUN npm install
-COPY . .
+
+# Copy all files from the backend folder
+COPY backend/ .
+
 RUN npm run build
 EXPOSE 3000
 CMD ["npm", "run", "start:prod"]
