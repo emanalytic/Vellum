@@ -4,8 +4,6 @@ Vellum is an intelligent productivity system designed for students and learners.
 
 When you add a task, the application uses AI to analyze its complexity and automatically breaks it down into smaller, actionable steps called chunks. This prevents you from feeling overwhelmed by large objectives. Vellum also features a smart scheduler that helps you organize these tasks into your day while respecting your natural energy peaks and available time.
 
-The application uses a visual design that looks like a paper sketchbook to provide a focused and calm environment for work. It tracks your work sessions, identifies your peak productivity hours, and provides insights into your progress over time.
-
 ---
 
 ![alt text](image.png)
