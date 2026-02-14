@@ -28,7 +28,6 @@ import type { Session } from "@supabase/supabase-js";
 import FloatingTimer from "./components/common/FloatingTimer";
 import ArchiveView from "./views/ArchiveView";
 import { useToast } from "./context/ToastContext";
-import Logo from "./components/common/Logo";
 import { useTasks } from "./hooks/useTasks";
 import JournalView from "./views/JournalView";
 
