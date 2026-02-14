@@ -210,7 +210,9 @@ function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth Event:", event);
+      console.log("Session User:", session?.user?.email);
       setSession(session);
       if (session) {
         initPreferences();
