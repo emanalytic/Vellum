@@ -1,74 +1,103 @@
-# Vellum 📜
+# Vellum
 
-> _Time is the brush. The day is the canvas._
+Vellum is an intelligent productivity system designed for students and learners. Unlike traditional task schedulers that only list what you need to do, Vellum helps you manage the entire process of completing a goal.
 
-**Vellum** is a lo-fi, sketchbook-style productivity application designed to help students and lifelong learners organize their lives with intention. It blends a nostalgic, tactile "pen and paper" aesthetic with powerful AI agents to help break down complex tasks, schedule study sessions, and track focus.
+When you add a task, the application uses AI to analyze its complexity and automatically breaks it down into smaller, actionable steps called chunks. This prevents you from feeling overwhelmed by large objectives. Vellum also features a smart scheduler that helps you organize these tasks into your day while respecting your natural energy peaks and available time.
 
----
-
-## ✨ Key Features
-
-### 🎨 Sketchbook Aesthetic
-
-- **Tactile UI**: Custom Tailwind configuration mimicking real paper textures, ink bleeds, and highlighter strokes.
-- **Hand-Drawn Icons**: Integrated `lucide-react` icons styled to look sketched.
-- **Micro-Interactions**: Satisfying "tape" effects, analyzing animations, and responsive hover states.
-
-### 🧠 AI-Powered Breakdown
-
-- **Task Analysis**: Uses **Groq** (LLM) to analyze task complexity (beginner to master).
-- **Auto-Chunking**: Automatically breaks down large, vague goals (e.g., "Learn React") into actionable, bite-sized steps with estimated durations.
-- **Skill-Based Estimation**: Adjusts time estimates based on your self-reported mastery level.
-
-### 📅 Smart Scheduling ("The Blueprint")
-
-- **Custom Calendar View**: A bespoke daily/weekly planner built from scratch (no heavy calendar libraries).
-- **Drag-and-Drop Organization**: Intuitively place tasks into time slots.
-- **Availability Windows**: Define your "Early Bird" or "Night Owl" hours to respect your natural rhythm.
-- **Visual Conflict Detection**: Smartly positions overlapping tasks to prevent scheduling conflicts.
-
-### ⏱️ Deep Work Tools
-
-- **Floating Focus Timer**: A persistent timer that tracks your "Deep Work" sessions.
-- **Session Logging**: Automatically logs time spent on specific tasks to the backend.
-- **Progress Tracking**: Visual progress bars and "Mastered" stamps for completed pursuits.
-
-### 📊 Insights & Analytics
-
-- **Productivity Charts**: Visualizes your focus distribution and output velocity.
-- **Review System**: Weekly and daily review modes to reflect on your progress.
+The application uses a visual design that looks like a paper sketchbook to provide a focused and calm environment for work. It tracks your work sessions, identifies your peak productivity hours, and provides insights into your progress over time.
 
 ---
 
-## 🛠️ Tech Stack
+![alt text](image.png)
 
-### Frontend (`/frontend`)
+## Features
 
-- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Animation**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Charts**: [Recharts](https://recharts.org/)
-- **State/Auth**: [Supabase Data Client](https://supabase.com/docs/reference/javascript/introduction)
+### AI Task Management
 
-### Backend (`/backend`)
+- The application uses AI to analyze how complex a task is.
+- It can automatically break down large goals into smaller, actionable steps.
+- The app estimates the time needed for tasks based on your experience level.
 
-- **Framework**: [NestJS](https://nestjs.com/)
-- **Language**: TypeScript
-- **Database**: [Supabase (PostgreSQL)](https://supabase.com/)
-- **AI**: [Groq SDK](https://groq.com/) (Llama 3 / Mixtral models)
-- **Validation**: `class-validator` + `class-transformer`
+### Schedule Management
+
+- Users can manage their tasks using a daily or weekly planner.
+- It includes a drag-and-drop system for organizing tasks.
+- You can set your preferred working hours, such as morning or evening.
+- The system helps identify and manage overlapping tasks in your schedule.
+
+### Focus Tools
+
+- A timer helps you track your work sessions.
+- The application automatically logs the time you spend on each task.
+- You can see your progress through visual bars and markers for finished tasks.
+
+### Insights and Analytics
+
+- The app provides charts that show your peak productivity times and focus distribution.
+- It includes tools for reviewing your progress every day or week.
 
 ---
 
-## 🚀 Getting Started
+## Project Structure
 
-### Prerequisites
+```
+vellum/
+├── backend/                # API and server logic
+│   ├── src/
+│   │   ├── ai/             # AI processing
+│   │   ├── auth/           # Authentication
+│   │   ├── scheduler/      # Scheduling logic
+│   │   ├── supabase/       # Database connection
+│   │   ├── tasks/          # Task management
+│   │   ├── app.module.ts   # Root module
+│   │   └── main.ts         # Entry point
+│   └── test/               # Tests
+│
+├── frontend/               # Client application
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/     # Reusable components
+│   │   │   ├── layout/     # Page layouts
+│   │   │   └── tasks/      # Task-related components
+│   │   ├── context/        # Application state
+│   │   ├── hooks/          # Shared logic
+│   │   ├── pages/          # Authentication pages
+│   │   ├── services/       # API clients
+│   │   ├── views/          # Main application views
+│   │   └── types/          # TypeScript definitions
+│   └── index.css           # Global styles
+```
 
-- **Node.js** (v18+ recommended)
-- **npm** or **pnpm**
-- **Supabase Account**: You'll need a project URL and Anon Key.
-- **Groq API Key**: For the AI task breakdown features.
+---
+
+## Technical Information
+
+### Frontend
+
+- Framework: React 19 and Vite
+- Styling: Tailwind CSS
+- Animation: Framer Motion
+- Icons: Lucide React
+- Charts: Recharts
+- Database and Authentication: Supabase
+
+### Backend
+
+- Framework: NestJS
+- Language: TypeScript
+- Database: Supabase (PostgreSQL)
+- AI: Groq (using Llama 3 or Mixtral models)
+
+---
+
+## Getting Started
+
+### Requirements
+
+- Node.js (version 18 or higher)
+- npm or pnpm
+- A Supabase account and project
+- A Groq API key
 
 ### 1. Clone the Repository
 
@@ -79,29 +108,24 @@ cd vellum
 
 ### 2. Backend Setup
 
-Navigate to the backend folder and install dependencies:
+Go to the backend folder and install the dependencies:
 
 ```bash
 cd backend
 npm install
 ```
 
-Create a `.env` file in `backend/` based on the template:
+Create a `.env` file in the `backend` folder with these settings:
 
 ```env
-# backend/.env
 PORT=3000
 CORS_ORIGIN=http://localhost:5173
-
-# Supabase Configuration
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-
-# AI Configuration (Groq)
-GROQ_API_KEY=gsk_...
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
-Start the backend development server:
+Start the backend server:
 
 ```bash
 npm run start:dev
@@ -109,105 +133,29 @@ npm run start:dev
 
 ### 3. Frontend Setup
 
-Open a new terminal, navigate to the frontend folder, and install dependencies:
+Open a new terminal, go to the frontend folder, and install the dependencies:
 
 ```bash
 cd frontend
 npm install
 ```
 
-Create a `.env` file in `frontend/` (Note: Vite requires `VITE_` prefix):
+Create a `.env` file in the `frontend` folder with these settings:
 
 ```env
-# frontend/.env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_API_URL=http://localhost:3000
 ```
 
-Start the frontend development server:
+Start the frontend server:
 
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:5173` to view the app!
+The application will be available at `http://localhost:5173`.
 
 ---
 
-## 📂 Project Structure
-
-```
-vellum/
-├── backend/                # NestJS API
-│   ├── src/
-│   │   ├── ai/             # AI processing & Groq integration
-│   │   ├── auth/           # Auth guards & strategies
-│   │   ├── scheduler/      # Smart scheduling logic
-│   │   ├── supabase/       # Database connection
-│   │   ├── tasks/          # Task CRUD & business logic
-│   │   ├── app.module.ts   # Root module
-│   │   └── main.ts         # Entry point
-│   └── test/               # E2E tests
-│
-├── frontend/               # React Client
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── common/     # Reusable UI (Buttons, Logo, Timer)
-│   │   │   ├── layout/     # Sidebar, Modals
-│   │   │   └── tasks/      # Task cards, Chunk panel
-│   │   ├── context/        # Toast & Confirm contexts
-│   │   ├── hooks/          # useTasks (central logic)
-│   │   ├── pages/          # Login & Auth pages
-│   │   ├── services/       # API & Supabase clients
-│   │   ├── views/          # Calendar, Journal, Analysis views
-│   │   └── types/          # Shared TypeScript interfaces
-│   └── index.css           # Global Tailwind imports
-```
-
----
-
-## 🎨 Design System
-
-Vellum uses a simplified "CSS-in-JS" approach via Tailwind utility classes to achieve its unique look:
-
-- **Colors**:
-  - `bg-paper-bg`: A bespoke off-white/noise texture.
-  - `text-ink`: #1a1a1a (Soft black for text).
-  - `bg-highlighter-yellow`: #fef08a (Classic fluorescent yellow).
-  - `bg-highlighter-pink`: #fbcfe8 (Fluorescent pink accent).
-- **Fonts**:
-  - `font-hand`: Custom handwritten font family for notes.
-  - `font-sketch`: Uppercase, blocky font for headers.
-  - `font-marker`: Bold, permanent-marker style for emphasis.
-- **Borders**:
-  - `sketch-border`: Custom utility adding loose, hand-drawn SVG borders or CSS `border-image`.
-
----
-
-## 🤖 AI Integration
-
-The AI features are powered by **Groq**, specifically leveraging fast inference models like **Llama 3** to provide near-instant feedback.
-
-- **Endpoint**: `POST /ai/classify-task`
-- **Input**: User task description ("Review Physics notes") + Skill Level.
-- **Output**: Structured JSON containing:
-  - `workload_type`: (e.g., "Recall/Memorization")
-  - `estimated_duration`: accurate time prediction.
-  - `suggested_chunks`: list of sub-tasks (e.g., "Read Chapter 4", "Solve Practice Problem 1").
-
----
-
-## 🤝 Contributing
-
-1. Fork the project.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+Author: Eman Nisar ([@emanalytic](https://github.com/emanalytic))

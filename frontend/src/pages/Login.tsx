@@ -162,7 +162,7 @@ const Login: React.FC = () => {
           ))}
         </div>
         <p className="font-sketch text-xs opacity-40">
-           &copy; {new Date().getFullYear()} Vellum. Crafted with <span className="text-red-400">♥</span> by Emann.
+           &copy; {new Date().getFullYear()} Vellum. Crafted with <span className="text-red-400">♥</span> by Eman.
         </p>
       </footer>
 
