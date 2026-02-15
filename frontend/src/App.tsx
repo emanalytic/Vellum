@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Lightbulb,
   LayoutDashboard,
+  Sparkles,
 } from "lucide-react";
 
 import type { Session } from "@supabase/supabase-js";
@@ -30,6 +31,7 @@ import ArchiveView from "./views/ArchiveView";
 import { useToast } from "./context/ToastContext";
 import { useTasks } from "./hooks/useTasks";
 import JournalView from "./views/JournalView";
+import GuideView from "./views/GuideView";
 
 function App() {
   const { showToast } = useToast();
@@ -37,8 +39,8 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "journal" | "calendar" | "analysis" | "archive"
-  >("journal");
+    "journal" | "calendar" | "analysis" | "archive" | "guide"
+  >("guide");
 
   const {
     tasks,
@@ -319,8 +321,6 @@ function App() {
           email: session.user.email || "",
           avatar: (session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture) as string,
         }}
-        preferences={preferences}
-        onUpdatePreferences={handlePreferenceChange}
         onUpdateProfile={handleUpdateProfile}
       />
 
@@ -352,6 +352,12 @@ function App() {
               className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "archive" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
             >
               <Archive size={20} /> Vault
+            </button>
+            <button
+              onClick={() => setActiveTab("guide")}
+              className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "guide" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
+            >
+              <Sparkles size={20} /> Guide
             </button>
           </div>
           <button
@@ -445,6 +451,7 @@ function App() {
                 onUpdate={updateTask}
               />
             )}
+            {activeTab === "guide" && <GuideView />}
           </div>
         </main>
       </div>

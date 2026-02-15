@@ -1,6 +1,5 @@
 import React from "react";
-import { X, Lightbulb, Smile, Monitor } from "lucide-react";
-import type { UserPreferences } from "../../types";
+import { X, Smile } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -10,8 +9,6 @@ interface SettingsModalProps {
     email: string;
     avatar?: string;
   };
-  preferences: UserPreferences;
-  onUpdatePreferences: (prefs: UserPreferences) => void;
   onUpdateProfile: (name: string, avatarUrl: string) => Promise<void>;
 }
 
@@ -19,8 +16,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   user,
-  preferences,
-  onUpdatePreferences,
   onUpdateProfile,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
@@ -117,44 +112,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             )}
           </div>
 
-          {/* Preferences Section */}
-          <div className="space-y-4">
-            <h3 className="font-hand text-xl font-bold flex items-center gap-2 border-b-2 border-dashed border-ink/20 pb-2">
-              <Monitor size={20} /> System
-            </h3>
-            
-            <div className="flex items-center justify-between p-2 hover:bg-highlighter-yellow/10 rounded transition-colors group">
-              <div className="flex items-start gap-3">
-                <div className="mt-1 p-2 bg-highlighter-pink/20 rounded-full group-hover:scale-110 transition-transform">
-                  <Lightbulb size={18} className="text-pink-600" />
-                </div>
-                <div>
-                  <p className="font-hand font-bold text-lg">Auto-Scheduler</p>
-                  <p className="text-xs opacity-60 max-w-[200px]">
-                    Automatically rearrange tasks when deadlines approach.
-                  </p>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={preferences.autoSchedule}
-                  onChange={(e) =>
-                    onUpdatePreferences({
-                      ...preferences,
-                      autoSchedule: e.target.checked,
-                    })
-                  }
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ink"></div>
-              </label>
-            </div>
-          </div>
 
           <div className="pt-6 text-center">
              <p className="font-hand text-sm opacity-40">
-               Version 1.0.0 (Sketchbook Build)
+               Version 1.0.0
              </p>
           </div>
         </div>
