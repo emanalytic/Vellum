@@ -84,7 +84,7 @@ vellum/
 - Framework: NestJS
 - Language: TypeScript
 - Database: Supabase (PostgreSQL)
-- AI: Groq (using Llama 3 or Mixtral models)
+- AI: OpenAI + Llama 3
 
 ---
 
@@ -95,7 +95,7 @@ vellum/
 - Node.js (version 18 or higher)
 - npm or pnpm
 - A Supabase account and project
-- A Groq API key
+- A OpenAI API key
 
 ### 1. Clone the Repository
 
@@ -120,7 +120,7 @@ PORT=3000
 CORS_ORIGIN=http://localhost:5173
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
-GROQ_API_KEY=your_groq_api_key
+OPENAI_API_KEY=your_groq_api_key
 ```
 
 Start the backend server:
