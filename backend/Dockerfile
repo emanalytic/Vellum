@@ -1,14 +1,29 @@
+# Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy package files
+COPY backend/package*.json ./
+RUN npm ci
+
+# Copy source and build
+COPY backend/ .
+RUN npm run build
+
+# Production stage
 FROM node:18-alpine
 WORKDIR /app
 
-# Copy package files from root relative to build context
+# Copy package files and install ONLY production dependencies
 COPY backend/package*.json ./
-RUN npm install
+RUN npm ci --only=production && npm cache clean --force
 
-# Copy source from root relative to build context
-COPY backend/ .
+# Copy built application from builder
+COPY --from=builder /app/dist ./dist
 
-RUN npm run build
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:'+process.env.PORT+'/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
 
-# Don't hardcode EXPOSE, Railway will handle the port
 CMD ["npm", "run", "start:prod"]
+
