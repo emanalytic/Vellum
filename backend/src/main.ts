@@ -27,6 +27,8 @@ async function bootstrap() {
       origin: [
         'http://localhost:5173',
         'http://localhost:3000',
+        'https://www.vellum.foo',
+        'https://vellum.foo',
         process.env.FRONTEND_URL || '',
       ].filter(Boolean),
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
