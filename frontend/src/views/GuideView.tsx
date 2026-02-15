@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Sparkles, Layout, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Pencil, Sparkles, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
 
 const GuideView: React.FC = () => {
   const processSteps = [
