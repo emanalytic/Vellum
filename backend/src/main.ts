@@ -36,11 +36,11 @@ async function bootstrap() {
     await app.listen(port, '0.0.0.0');
     
     const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(`✅ Vellum Backend ready on port ${port}`);
+    console.log(`Vellum Backend ready on port ${port}`);
     console.log(`Memory usage: ${Math.round(used * 100) / 100} MB`);
     
   } catch (error) {
-    console.error('❌ FATAL STARTUP ERROR:', error);
+    console.error('FATAL STARTUP ERROR:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     console.error('Error details:', JSON.stringify(error, null, 2));
     process.exit(1);
@@ -48,7 +48,7 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error('❌ UNHANDLED BOOTSTRAP ERROR:', error);
+  console.error('UNHANDLED BOOTSTRAP ERROR:', error);
   process.exit(1);
 });
 
