@@ -155,7 +155,7 @@ const Login: React.FC = () => {
       {/* ─── Footer ─── */}
       <footer className="relative z-10 py-8 text-center">
         <div className="flex justify-center gap-6 mb-4 opacity-50">
-          <a href="https://github.com/emanalytic" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-ink/5 rounded-full hover:scale-110 transition-all hover:text-highlighter-pink">
+          <a href="https://github.com/emanalytic/vellum" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-ink/5 rounded-full hover:scale-110 transition-all hover:text-highlighter-pink">
             <Github size={20} />
           </a>
           <a href="https://www.linkedin.com/in/eman-nisar/" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-ink/5 rounded-full hover:scale-110 transition-all hover:text-highlighter-pink">
