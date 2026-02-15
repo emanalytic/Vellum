@@ -219,8 +219,12 @@ function App() {
       setSession(session);
       if (session) {
         initPreferences();
-        if (window.location.hash && window.location.hash.includes("access_token")) {
-           window.history.replaceState(null, "", window.location.pathname);
+        if (window.location.hash) {
+          window.history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.search,
+          );
         }
       }
     });
