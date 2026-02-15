@@ -25,7 +25,12 @@ async function bootstrap() {
     // CORS Configuration
     // In production, you might want to restrict this to specific domains
     app.enableCors({
-      origin: true, // Allow all origins for now, but consider restricting in prod
+      origin: [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://www.vellum.foo',
+        process.env.FRONTEND_URL || '',
+      ].filter(Boolean),
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });
