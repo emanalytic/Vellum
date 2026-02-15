@@ -5,9 +5,17 @@ import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  console.log('🚀 Starting Vellum Backend...');
+  console.log('Environment:', process.env.NODE_ENV || 'development');
+  console.log('Port:', process.env.PORT ?? 3000);
+  
   try {
-    const app = await NestFactory.create(AppModule);
+    console.log('Creating NestJS application...');
+    const app = await NestFactory.create(AppModule, {
+      logger: ['error', 'warn', 'log'],
+    });
     
+    console.log('Configuring middleware...');
     // Quick request logger to see if requests are reaching the server
     app.use((req, res, next) => {
       console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
@@ -24,15 +32,23 @@ async function bootstrap() {
     app.use(urlencoded({ extended: true, limit: '1mb' }));
     
     const port = process.env.PORT ?? 3000;
+    console.log(`Attempting to listen on port ${port}...`);
     await app.listen(port, '0.0.0.0');
     
     const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(`Vellum Backend ready on port ${port}`);
+    console.log(`✅ Vellum Backend ready on port ${port}`);
     console.log(`Memory usage: ${Math.round(used * 100) / 100} MB`);
     
   } catch (error) {
-    console.error('FATAL STARTUP ERROR:', error);
+    console.error('❌ FATAL STARTUP ERROR:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error details:', JSON.stringify(error, null, 2));
     process.exit(1);
   }
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('❌ UNHANDLED BOOTSTRAP ERROR:', error);
+  process.exit(1);
+});
+
