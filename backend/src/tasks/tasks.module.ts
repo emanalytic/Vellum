@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TasksService } from '../tasks/tasks.service';
-import { TasksController } from '../tasks/tasks.controller';
+import { TasksService } from './tasks.service';
+import { TasksController } from './tasks.controller';
 import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({

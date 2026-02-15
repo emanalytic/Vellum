@@ -22,7 +22,7 @@ export class TasksController {
 
   @Get()
   findAll(@Req() req: any) {
-    return this.tasksService.findAll(this.extractToken(req));
+    return this.tasksService.findAll(this.extractToken(req), req.user.id);
   }
 
   @Post()

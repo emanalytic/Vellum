@@ -12,10 +12,11 @@ export class TasksService {
     return this.supabase.getUserClient(token);
   }
 
-  async findAll(token: string) {
+async findAll(token: string, userId: string) {
     const { data: tasksData, error } = await this.getClient(token)
       .from('tasks')
       .select(`*, chunks (*), progress_logs (*)`)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {

@@ -17,7 +17,7 @@ export class SchedulerService {
     userId: string,
     scheduleDto?: ScheduleDto,
   ) {
-    const tasks = await this.tasksService.findAll(token);
+    const tasks = await this.tasksService.findAll(token, userId);
     const preferences = await this.tasksService.getPreferences(token, userId);
 
     if (!preferences) {
