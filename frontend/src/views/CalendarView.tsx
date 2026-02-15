@@ -21,6 +21,7 @@ interface CalendarViewProps {
   onAddTaskAtTime?: (date: Date, hour: number) => void;
   onTaskClick?: (task: Task) => void;
   onScheduleTask?: (taskId: string, date: Date, hour: number) => void;
+  onTabChange?: (tab: any) => void;
 }
 
 const HOUR_HEIGHT = 60; // px per hour row — single source of truth
@@ -38,6 +39,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   onAddTaskAtTime,
   onTaskClick,
   onScheduleTask,
+  onTabChange,
 }) => {
   const [view, setView] = useState<"day" | "week">("day");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -609,6 +611,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                       {dayTasks.length === 0 && (
                         <p className="text-center font-hand text-sm opacity-20 italic py-6">
                           Empty canvas
+                          {onTabChange && (
+                            <button
+                              onClick={() => onTabChange("guide")}
+                              className="block mx-auto mt-2 text-xs text-highlighter-pink hover:underline"
+                            >
+                              Need help?
+                            </button>
+                          )}
                         </p>
                       )}
                       {dayTasks.map((task) => (

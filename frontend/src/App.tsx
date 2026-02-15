@@ -431,6 +431,7 @@ function App() {
                   onSelectTask={setSelectedTask}
                   onEditTask={(task: Task) => setEditingTaskId(task.id)}
                   isClassifying={isClassifying}
+                  onTabChange={setActiveTab}
                 />
               </>
             )}
@@ -447,6 +448,7 @@ function App() {
                 }}
                 onTaskClick={(task: Task) => setEditingTaskId(task.id)}
                 onScheduleTask={handleScheduleTask}
+                onTabChange={setActiveTab}
               />
             )}
 

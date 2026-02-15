@@ -19,6 +19,7 @@ interface JournalViewProps {
   onSelectTask: (task: Task) => void;
   onEditTask: (task: Task) => void;
   isClassifying: boolean;
+  onTabChange?: (tab: any) => void;
 }
 
 const JournalView: React.FC<JournalViewProps> = ({
@@ -29,6 +30,7 @@ const JournalView: React.FC<JournalViewProps> = ({
   onSelectTask,
   onEditTask,
   isClassifying,
+  onTabChange,
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [deck, setDeck] = useState({
@@ -309,7 +311,7 @@ const JournalView: React.FC<JournalViewProps> = ({
           <div className="absolute top-[15%] right-[10%] -rotate-12 opacity-15 hidden md:block">
             <Coffee size={60} className="lg:size-24" />
           </div>
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-4 pointer-events-auto">
             <div className="font-marker text-6xl md:text-8xl text-ink/20 transform -rotate-3 mb-8">
               tabula rasa
             </div>
@@ -319,6 +321,14 @@ const JournalView: React.FC<JournalViewProps> = ({
             <p className="font-sketch text-xl opacity-60 italic">
               "Small steps, every day, lead to big results."
             </p>
+            {onTabChange && (
+              <button 
+                onClick={() => onTabChange("guide")}
+                className="mt-8 font-hand text-lg text-ink/40 hover:text-highlighter-pink hover:underline underline-offset-4 transition-colors"
+              >
+                (confused? read the manual)
+              </button>
+            )}
           </div>
         </div>
       )}
