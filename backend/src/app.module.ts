@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { AiModule } from './ai/ai.module';
 import { TasksModule } from './tasks/tasks.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     AiModule,
     TasksModule,
     SchedulerModule
-  ]
+  ],
+  controllers: [AppController]
 })
 export class AppModule {}
