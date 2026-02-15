@@ -15,14 +15,7 @@ async function bootstrap() {
       bufferLogs: true,
     });
 
-    // Security & Performance Middleware
-    app.use(helmet());
-    app.use(compression());
-    
-    // Application Lifecycle
-    app.enableShutdownHooks();
-
-    // CORS Configuration
+    // CORS Configuration — MUST be before helmet/other middleware
     app.enableCors({
       origin: [
         'http://localhost:5173',
@@ -32,8 +25,18 @@ async function bootstrap() {
         process.env.FRONTEND_URL || '',
       ].filter(Boolean),
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
       credentials: true,
     });
+
+    // Security & Performance Middleware
+    app.use(helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }));
+    app.use(compression());
+    
+    // Application Lifecycle
+    app.enableShutdownHooks();
     
     // Validation
     app.useGlobalPipes(new ValidationPipe({ 
