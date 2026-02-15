@@ -17,21 +17,18 @@ async function bootstrap() {
 
     // CORS Configuration — MUST be before helmet/other middleware
     app.enableCors({
-      origin: [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://www.vellum.foo',
-        'https://vellum.foo',
-        process.env.FRONTEND_URL || '',
-      ].filter(Boolean),
+      origin: true, // Temporarily allow all for debugging
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+      allowedHeaders: '*',
       credentials: true,
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
     });
 
     // Security & Performance Middleware
     app.use(helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'unsafe-none' },
     }));
     app.use(compression());
     
