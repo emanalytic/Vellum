@@ -23,12 +23,10 @@ async function bootstrap() {
     app.enableShutdownHooks();
 
     // CORS Configuration
-    // In production, you might want to restrict this to specific domains
     app.enableCors({
       origin: [
         'http://localhost:5173',
         'http://localhost:3000',
-        'https://www.vellum.foo',
         process.env.FRONTEND_URL || '',
       ].filter(Boolean),
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -60,18 +58,8 @@ async function bootstrap() {
   }
 }
 
-// Global Error Handling for Bootstrap
 bootstrap().catch((error) => {
-  // Use console.error here as Logger might not be initialized
   console.error('UNHANDLED BOOTSTRAP ERROR:', error);
   process.exit(1);
-});
-
-// Explicit Signal Handling (Optional since enableShutdownHooks is on, but good for container orchestrators)
-process.on('SIGTERM', () => {
-  // NestJS handleShutdownHooks will take care of Graceful Shutdown usually
-  // But strictly logging it is good
-  const logger = new Logger('Process');
-  logger.log('Received SIGTERM signal');
 });
 
