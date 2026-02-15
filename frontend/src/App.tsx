@@ -209,6 +209,11 @@ function App() {
       setSession(session);
       if (session) {
         initPreferences();
+        if (window.location.hash) {
+          setTimeout(() => {
+            window.history.replaceState(null, "", window.location.pathname + window.location.search);
+          }, 0);
+        }
       }
       setIsLoadingSession(false);
     });
@@ -220,11 +225,9 @@ function App() {
       if (session) {
         initPreferences();
         if (window.location.hash) {
-          window.history.replaceState(
-            null,
-            "",
-            window.location.pathname + window.location.search,
-          );
+          setTimeout(() => {
+            window.history.replaceState(null, "", window.location.pathname + window.location.search);
+          }, 0);
         }
       }
     });
