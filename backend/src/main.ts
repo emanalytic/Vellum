@@ -15,6 +15,8 @@ async function bootstrap() {
       logger: ['error', 'warn', 'log'],
     });
     
+    app.enableShutdownHooks();
+    
     console.log('Configuring middleware...');
     app.use((req, res, next) => {
       console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
@@ -46,8 +48,18 @@ async function bootstrap() {
   }
 }
 
-bootstrap().catch((error) => {
-  console.error('UNHANDLED BOOTSTRAP ERROR:', error);
-  process.exit(1);
-});
+  bootstrap().catch((error) => {
+    console.error('UNHANDLED BOOTSTRAP ERROR:', error);
+    process.exit(1);
+  });
+  
+  process.on('SIGTERM', () => {
+    console.log('Received SIGTERM, shutting down gracefully...');
+    process.exit(0);
+  });
+  
+  process.on('SIGINT', () => {
+    console.log('Received SIGINT, shutting down gracefully...');
+    process.exit(0);
+  });
 
