@@ -109,4 +109,12 @@ export class UpsertTaskDto {
   @Min(0)
   @IsOptional()
   actualSatisfaction?: number;
+
+  @IsInt()
+  @IsOptional()
+  timeSpent?: number;
+
+  @IsArray()
+  @IsOptional()
+  history?: any[];
 }

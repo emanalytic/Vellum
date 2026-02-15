@@ -64,7 +64,7 @@ async findAll(token: string, userId: string) {
       deadline: dto.deadline,
       estimated_time: dto.estimatedTime,
       status: dto.status,
-      total_time_seconds: dto.totalTimeSeconds ?? 0,
+      total_time_seconds: dto.totalTimeSeconds ?? dto.timeSpent ?? 0,
       scheduled_start: dto.scheduledStart ?? null,
       scheduled_end: dto.scheduledEnd ?? null,
       predicted_satisfaction: dto.predictedSatisfaction ?? null,
