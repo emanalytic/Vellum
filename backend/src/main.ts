@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
-import * as compression from 'compression';
+import compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -12,7 +12,7 @@ async function bootstrap() {
   try {
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log', 'debug', 'verbose'],
-      bufferLogs: true,
+      bufferLogs: false,
     });
 
     // CORS Configuration — MUST be before helmet/other middleware
