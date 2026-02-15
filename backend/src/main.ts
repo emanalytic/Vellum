@@ -1,65 +1,72 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { json, urlencoded } from 'express';
+import helmet from 'helmet';
+import * as compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  console.log('Starting Vellum Backend...');
-  console.log('Environment:', process.env.NODE_ENV || 'development');
-  console.log('Port:', process.env.PORT ?? 3000);
+  const logger = new Logger('Bootstrap');
   
   try {
-    console.log('Creating NestJS application...');
     const app = await NestFactory.create(AppModule, {
-      logger: ['error', 'warn', 'log'],
-    });
-    
-    app.enableShutdownHooks();
-    
-    console.log('Configuring middleware...');
-    app.use((req, res, next) => {
-      console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
-      next();
+      logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+      bufferLogs: true,
     });
 
+    // Security & Performance Middleware
+    app.use(helmet());
+    app.use(compression());
+    
+    // Application Lifecycle
+    app.enableShutdownHooks();
+
+    // CORS Configuration
+    // In production, you might want to restrict this to specific domains
     app.enableCors({
-      origin: true, // Mirror the request origin (safer for debugging)
+      origin: true, // Allow all origins for now, but consider restricting in prod
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });
     
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-    app.use(json({ limit: '1mb' }));
-    app.use(urlencoded({ extended: true, limit: '1mb' }));
+    // Validation
+    app.useGlobalPipes(new ValidationPipe({ 
+      whitelist: true, 
+      transform: true,
+      forbidNonWhitelisted: true, // stricter validation
+    }));
+
+    // Body Parsers
+    app.use(json({ limit: '10mb' })); // Increased limit slightly for larger payloads if needed
+    app.use(urlencoded({ extended: true, limit: '10mb' }));
     
+    // Port Configuration
     const port = process.env.PORT ?? 3000;
-    console.log(`Attempting to listen on port ${port}...`);
+    
     await app.listen(port, '0.0.0.0');
     
-    const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(`Vellum Backend ready on port ${port}`);
-    console.log(`Memory usage: ${Math.round(used * 100) / 100} MB`);
+    logger.log(`Vellum Backend is running on port ${port}`);
+    logger.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     
   } catch (error) {
-    console.error('FATAL STARTUP ERROR:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    console.error('Error details:', JSON.stringify(error, null, 2));
+    logger.error('Fatal error during application startup', error);
     process.exit(1);
   }
 }
 
-  bootstrap().catch((error) => {
-    console.error('UNHANDLED BOOTSTRAP ERROR:', error);
-    process.exit(1);
-  });
-  
-  process.on('SIGTERM', () => {
-    console.log('Received SIGTERM, shutting down gracefully...');
-    process.exit(0);
-  });
-  
-  process.on('SIGINT', () => {
-    console.log('Received SIGINT, shutting down gracefully...');
-    process.exit(0);
-  });
+// Global Error Handling for Bootstrap
+bootstrap().catch((error) => {
+  // Use console.error here as Logger might not be initialized
+  console.error('UNHANDLED BOOTSTRAP ERROR:', error);
+  process.exit(1);
+});
+
+// Explicit Signal Handling (Optional since enableShutdownHooks is on, but good for container orchestrators)
+process.on('SIGTERM', () => {
+  // NestJS handleShutdownHooks will take care of Graceful Shutdown usually
+  // But strictly logging it is good
+  const logger = new Logger('Process');
+  logger.log('Received SIGTERM signal');
+});
 

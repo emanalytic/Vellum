@@ -3,21 +3,17 @@ import { Controller, Get } from '@nestjs/common';
 @Controller()
 export class AppController {
   @Get()
-  getHello(): object {
+  getHello() {
     return {
-      status: 'ok',
-      message: 'Vellum Backend is Running!',
+      service: 'Vellum Backend',
+      status: 'operational',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      memory: {
-        heapUsed: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
-        heapTotal: `${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB`
-      }
+      env: process.env.NODE_ENV || 'development',
     };
   }
 
   @Get('health')
-  healthCheck(): object {
+  healthCheck() {
     return {
       status: 'healthy',
       timestamp: new Date().toISOString()
