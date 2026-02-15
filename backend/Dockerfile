@@ -1,13 +1,14 @@
 FROM node:18-alpine
 WORKDIR /app
 
-# Copy from the backend folder specifically
+# Copy package files from root relative to build context
 COPY backend/package*.json ./
 RUN npm install
 
-# Copy all files from the backend folder
+# Copy source from root relative to build context
 COPY backend/ .
 
 RUN npm run build
-EXPOSE 3000
+
+# Don't hardcode EXPOSE, Railway will handle the port
 CMD ["npm", "run", "start:prod"]
