@@ -5,7 +5,7 @@ import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  console.log('🚀 Starting Vellum Backend...');
+  console.log('Starting Vellum Backend...');
   console.log('Environment:', process.env.NODE_ENV || 'development');
   console.log('Port:', process.env.PORT ?? 3000);
   
@@ -16,7 +16,6 @@ async function bootstrap() {
     });
     
     console.log('Configuring middleware...');
-    // Quick request logger to see if requests are reaching the server
     app.use((req, res, next) => {
       console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
       next();
