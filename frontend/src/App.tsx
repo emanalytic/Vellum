@@ -200,19 +200,20 @@ function App() {
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, [session, tasksRef]);
 
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
         initPreferences();
       }
+      setIsLoadingSession(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth Event:", event);
-      console.log("Session User:", session?.user?.email);
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
         initPreferences();
@@ -283,6 +284,14 @@ function App() {
       showToast("Failed to update profile: " + e.message, "error");
     }
   };
+
+  if (isLoadingSession) {
+    return (
+      <div className="min-h-screen bg-paper-bg flex items-center justify-center">
+        <div className="font-marker text-4xl animate-pulse">Opening your sketchbook...</div>
+      </div>
+    );
+  }
 
   if (!session) return <Login />;
 
