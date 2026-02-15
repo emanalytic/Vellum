@@ -1,6 +1,6 @@
 import React from 'react';
 import { supabase } from '../services/supabase';
-import { LogIn, Github, Twitter, Linkedin, Lightbulb, MoveRight, Star, Pencil } from 'lucide-react';
+import { LogIn, Github, Linkedin, Lightbulb, MoveRight, Star, Pencil } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Logo from '../components/common/Logo';
 
@@ -155,11 +155,12 @@ const Login: React.FC = () => {
       {/* ─── Footer ─── */}
       <footer className="relative z-10 py-8 text-center">
         <div className="flex justify-center gap-6 mb-4 opacity-50">
-          {[Github, Twitter, Linkedin].map((Icon, i) => (
-            <a key={i} href="#" className="p-2 hover:bg-ink/5 rounded-full hover:scale-110 transition-all hover:text-highlighter-pink">
-              <Icon size={20} />
-            </a>
-          ))}
+          <a href="https://github.com/emanalytic" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-ink/5 rounded-full hover:scale-110 transition-all hover:text-highlighter-pink">
+            <Github size={20} />
+          </a>
+          <a href="https://www.linkedin.com/in/eman-nisar/" target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-ink/5 rounded-full hover:scale-110 transition-all hover:text-highlighter-pink">
+            <Linkedin size={20} />
+          </a>
         </div>
         <p className="font-sketch text-xs opacity-40">
            &copy; {new Date().getFullYear()} Vellum. Crafted with <span className="text-red-400">♥</span> by Eman.
