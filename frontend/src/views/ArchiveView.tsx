@@ -31,7 +31,7 @@ const ArchiveView: React.FC<ArchiveViewProps> = ({ tasks, onDelete }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `StudySketch-Archive-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `Vellum-Archive-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
   };
 
