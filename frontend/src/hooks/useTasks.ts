@@ -118,6 +118,23 @@ export const useTasks = (session: Session | null) => {
   };
 
   const updateTask = useCallback(async (id: string, updates: Partial<Task>) => {
+    // Client-side validation before sending
+    if (updates.deadline) {
+      const deadlineDate = new Date(updates.deadline);
+      if (deadlineDate <= new Date()) {
+        showToast("Deadline must be in the future.", "error");
+        return;
+      }
+    }
+
+    if (updates.estimatedTime) {
+      const mins = parseInt(updates.estimatedTime);
+      if (isNaN(mins) || mins < 1) {
+        showToast("Duration must be at least 1 minute.", "error");
+        return;
+      }
+    }
+
     const originalTasks = [...tasksRef.current];
     setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
 
@@ -128,10 +145,11 @@ export const useTasks = (session: Session | null) => {
           const finalTask = { ...taskToUpdate, ...updates };
           await api.upsertTask(finalTask);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error("Update error:", e);
         setTasks(originalTasks);
-        showToast("Ink ran out. Try again?", "error");
+        const msg = e.message || "Something went wrong.";
+        showToast(`Failed to save: ${msg}`, "error");
       }
     }
   }, [session, showToast]);

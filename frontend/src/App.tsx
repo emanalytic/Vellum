@@ -483,7 +483,7 @@ function App() {
 
       {editingTask && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-ink/70 backdrop-blur-md">
-          <div className="max-w-2xl w-full">
+          <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="sketch-border p-8 bg-white transform -rotate-1 relative shadow-2xl">
               <button
                 onClick={() => { playPop(); setEditingTaskId(null); }}
@@ -497,7 +497,8 @@ function App() {
                 Refine Task
               </h3>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
+                {/* Description */}
                 <div className="flex flex-col">
                   <label className="font-sketch text-xs uppercase opacity-40 ml-1">
                     The Goal
@@ -513,6 +514,7 @@ function App() {
                   />
                 </div>
 
+                {/* Deadline + Estimated Time */}
                 <div className="grid grid-cols-2 gap-8">
                   <div className="flex flex-col">
                     <label className="font-sketch text-xs uppercase opacity-40 ml-1">
@@ -520,33 +522,70 @@ function App() {
                     </label>
                     <input
                       type="datetime-local"
-                      value={new Date(editingTask.deadline)
+                      value={editingTask.deadline ? new Date(editingTask.deadline)
                         .toISOString()
-                        .slice(0, 16)}
-                      onChange={(e) =>
-                        updateTask(editingTask.id, { deadline: e.target.value })
-                      }
+                        .slice(0, 16) : ''}
+                      onChange={(e) => {
+                        const selectedDate = new Date(e.target.value);
+                        const now = new Date();
+                        if (selectedDate <= now) {
+                          showToast("Deadline must be in the future!", "error");
+                          return;
+                        }
+                        updateTask(editingTask.id, { deadline: e.target.value });
+                      }}
                       className="font-hand text-xl p-2 border-b-2 border-ink focus:outline-none bg-transparent"
                     />
                   </div>
                   <div className="flex flex-col">
                     <label className="font-sketch text-xs uppercase opacity-40 ml-1">
-                      Estimated Time
+                      Estimated Time (mins)
                     </label>
                     <input
                       type="number"
+                      min="1"
                       value={parseInt(editingTask.estimatedTime) || 0}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (val < 1 || isNaN(val)) {
+                          showToast("Duration must be at least 1 minute.", "error");
+                          return;
+                        }
                         updateTask(editingTask.id, {
                           estimatedTime: `${e.target.value}m`,
-                        })
-                      }
+                        });
+                      }}
                       className="font-hand text-xl p-2 border-b-2 border-ink focus:outline-none bg-transparent"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-6 border-t border-ink/10">
+                {/* Skill Level */}
+                <div className="flex flex-col">
+                  <label className="font-sketch text-xs uppercase opacity-40 ml-1">
+                    Current Mastery
+                  </label>
+                  <select
+                    value={editingTask.skillLevel}
+                    onChange={(e) => {
+                      playClick();
+                      updateTask(editingTask.id, { skillLevel: e.target.value });
+                    }}
+                    className="font-hand text-xl p-2 border-b-2 border-ink focus:outline-none bg-transparent appearance-none cursor-pointer"
+                  >
+                    <option value="total_novice">Total Novice</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="master">Master</option>
+                  </select>
+                </div>
+
+                {/* Priority */}
+                <div className="flex flex-col">
+                  <label className="font-sketch text-xs uppercase opacity-40 ml-1 mb-2">
+                    Priority
+                  </label>
                   <div className="flex gap-4">
                     {(["low", "medium", "high"] as TaskPriority[]).map((p) => (
                       <button
@@ -561,6 +600,86 @@ function App() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Scheduling Params */}
+                <div className="pt-4 border-t border-ink/10 grid grid-cols-2 gap-8">
+                  <div className="flex flex-col">
+                    <label className="font-sketch text-xs uppercase opacity-40 ml-1">
+                      Daily Repeats ({editingTask.targetSessionsPerDay || 1}x)
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={editingTask.targetSessionsPerDay || 1}
+                      onChange={(e) => {
+                        playClick();
+                        updateTask(editingTask.id, {
+                          targetSessionsPerDay: parseInt(e.target.value),
+                        });
+                      }}
+                      className="accent-ink cursor-pointer mt-2"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="font-sketch text-xs uppercase opacity-40 ml-1">
+                      Min Spacing ({editingTask.minSpacingMinutes || 60}m)
+                    </label>
+                    <input
+                      type="range"
+                      min="15"
+                      max="480"
+                      step="15"
+                      value={editingTask.minSpacingMinutes || 60}
+                      onChange={(e) => {
+                        playClick();
+                        updateTask(editingTask.id, {
+                          minSpacingMinutes: parseInt(e.target.value),
+                        });
+                      }}
+                      className="accent-ink cursor-pointer mt-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Predicted Satisfaction */}
+                <div className="pt-4 border-t border-ink/10">
+                  <label className="font-sketch text-xs uppercase opacity-40 ml-1 block mb-2">
+                    Predicted Satisfaction ({editingTask.predictedSatisfaction ?? 50}%)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <span className="font-hand text-sm opacity-50">Meh</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={editingTask.predictedSatisfaction ?? 50}
+                      onChange={(e) => {
+                        playClick();
+                        updateTask(editingTask.id, {
+                          predictedSatisfaction: parseInt(e.target.value),
+                        });
+                      }}
+                      className="w-full accent-highlighter-pink cursor-pointer"
+                    />
+                    <span className="font-hand text-sm opacity-50">Joy!</span>
+                  </div>
+                </div>
+
+                {/* Actions row */}
+                <div className="flex justify-between items-center pt-6 border-t border-ink/10">
+                  <button
+                    onClick={() => {
+                      playClick();
+                      deleteTask(editingTask.id);
+                      setEditingTaskId(null);
+                    }}
+                    className="text-red-500 font-hand text-lg hover:underline underline-offset-4 opacity-60 hover:opacity-100"
+                  >
+                    Delete Task
+                  </button>
                   <button
                     onClick={() => { playClick(); setEditingTaskId(null); }}
                     className="px-6 py-2 md:px-10 md:py-3 sketch-border bg-ink text-white font-marker text-xl md:text-2xl hover:bg-highlighter-yellow hover:text-ink transition-all shadow-[4px_4px_0_rgba(0,0,0,0.5)]"
