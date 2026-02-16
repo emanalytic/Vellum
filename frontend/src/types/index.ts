@@ -36,6 +36,17 @@ export interface Task {
   scheduledEnd?: string;
   predictedSatisfaction?: number;
   actualSatisfaction?: number;
+  targetSessionsPerDay?: number;
+  minSpacingMinutes?: number;
+  instances?: TaskInstance[];
+}
+
+export interface TaskInstance {
+  id: string;
+  start: string;
+  end: string;
+  status: 'scheduled' | 'completed' | 'missed' | 'skipped';
+  actualDurationSeconds?: number;
 }
 
 export interface UserPreferences {
@@ -47,6 +58,5 @@ export interface UserPreferences {
 export interface SchedulerResult {
   scheduledCount: number;
   unschedulableCount: number;
-  unschedulableIds: string[];
-  schedule: { id: string; start: string; end: string }[];
+  schedule: { taskId: string; start: string; end: string }[];
 }

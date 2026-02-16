@@ -57,6 +57,8 @@ export const useTasks = (session: Session | null) => {
     estimatedTime: string;
     wantsChunks: boolean;
     predictedSatisfaction?: number;
+    targetSessionsPerDay?: number;
+    minSpacingMinutes?: number;
   }) => {
     if (!session) return;
     if (!deck.deadline) {
@@ -95,6 +97,8 @@ export const useTasks = (session: Session | null) => {
         chunks: chunks,
         history: [],
         predictedSatisfaction: deck.predictedSatisfaction,
+        targetSessionsPerDay: deck.targetSessionsPerDay || 1,
+        minSpacingMinutes: deck.minSpacingMinutes || 60,
       };
 
       await api.upsertTask(newTask);
@@ -245,20 +249,11 @@ export const useTasks = (session: Session | null) => {
     setIsScheduling(true);
     try {
       const result = await api.runSmartSchedule();
-      if (result.schedule) {
-        setTasks(prev => prev.map(t => {
-          const scheduled = result.schedule.find(st => st.id === t.id);
-          if (scheduled) {
-            return {
-              ...t,
-              scheduledStart: scheduled.start,
-              scheduledEnd: scheduled.end,
-              status: 'idle' 
-            };
-          }
-          return t;
-        }));
-        showToast("Schedule refined by AI!", "success");
+      await fetchTasks();
+      if (result.scheduledCount > 0) {
+        showToast("Schedule refined!", "success");
+      } else {
+        showToast("Schedule updated.", "info");
       }
       if (result.unschedulableCount > 0) {
         showToast(`Heads up: ${result.unschedulableCount} tasks couldn't fit.`, "info");

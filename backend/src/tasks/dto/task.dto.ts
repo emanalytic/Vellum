@@ -117,4 +117,14 @@ export class UpsertTaskDto {
   @IsArray()
   @IsOptional()
   history?: any[];
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  targetSessionsPerDay?: number;
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  minSpacingMinutes?: number;
 }

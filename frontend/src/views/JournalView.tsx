@@ -43,6 +43,8 @@ const JournalView: React.FC<JournalViewProps> = ({
     estimatedTime: "60",
     wantsChunks: true,
     predictedSatisfaction: 50,
+    targetSessionsPerDay: 1,
+    minSpacingMinutes: 60,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,6 +61,8 @@ const JournalView: React.FC<JournalViewProps> = ({
         estimatedTime: "60",
         wantsChunks: true,
         predictedSatisfaction: 50,
+        targetSessionsPerDay: 1,
+        minSpacingMinutes: 60,
       });
       setShowAddForm(false);
     }
@@ -171,6 +175,49 @@ const JournalView: React.FC<JournalViewProps> = ({
                         })
                       }
                       className="font-hand text-xl p-2 border-b-2 border-ink focus:outline-none focus:border-highlighter-yellow bg-transparent w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* ─── Repetition and Spacing (The "Best Practice" stuff) ─── */}
+                <div className="pt-6 border-t border-ink/10 grid grid-cols-2 gap-8">
+                  <div className="flex flex-col">
+                    <label className="font-sketch text-xs uppercase opacity-40 ml-1">
+                      Daily Repeats ({deck.targetSessionsPerDay}x)
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={deck.targetSessionsPerDay}
+                      onChange={(e) => {
+                        playClick();
+                        setDeck({
+                          ...deck,
+                          targetSessionsPerDay: parseInt(e.target.value),
+                        });
+                      }}
+                      className="accent-ink cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="font-sketch text-xs uppercase opacity-40 ml-1">
+                      Min Spacing ({deck.minSpacingMinutes}m)
+                    </label>
+                    <input
+                      type="range"
+                      min="15"
+                      max="480"
+                      step="15"
+                      value={deck.minSpacingMinutes}
+                      onChange={(e) => {
+                        playClick();
+                        setDeck({
+                          ...deck,
+                          minSpacingMinutes: parseInt(e.target.value),
+                        });
+                      }}
+                      className="accent-ink cursor-pointer"
                     />
                   </div>
                 </div>

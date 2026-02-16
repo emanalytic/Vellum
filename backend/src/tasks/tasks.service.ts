@@ -15,7 +15,7 @@ export class TasksService {
 async findAll(token: string, userId: string) {
     const { data: tasksData, error } = await this.getClient(token)
       .from('tasks')
-      .select(`*, chunks (*), progress_logs (*)`)
+      .select(`*, chunks (*), progress_logs (*), task_instances (*)`)
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -38,11 +38,20 @@ async findAll(token: string, userId: string) {
       scheduledEnd: t.scheduled_end,
       predictedSatisfaction: t.predicted_satisfaction,
       actualSatisfaction: t.actual_satisfaction,
+      targetSessionsPerDay: t.target_sessions_per_day || 1,
+      minSpacingMinutes: t.min_spacing_minutes || 60,
       chunks: (t.chunks || []).map((c: any) => ({
         id: c.id,
         chunk_name: c.chunk_name,
         duration: c.duration,
         completed: c.completed,
+      })),
+      instances: (t.task_instances || []).map((inst: any) => ({
+        id: inst.id,
+        start: inst.start_time,
+        end: inst.end_time,
+        status: inst.status,
+        actualDurationSeconds: inst.actual_duration_seconds,
       })),
       history: (t.progress_logs || []).map((l: any) => ({
         date: l.created_at,
@@ -69,6 +78,8 @@ async findAll(token: string, userId: string) {
       scheduled_end: dto.scheduledEnd ?? null,
       predicted_satisfaction: dto.predictedSatisfaction ?? null,
       actual_satisfaction: dto.actualSatisfaction ?? null,
+      target_sessions_per_day: dto.targetSessionsPerDay ?? 1,
+      min_spacing_minutes: dto.minSpacingMinutes ?? 60,
     };
 
     if (dto.id) {
@@ -206,5 +217,55 @@ async findAll(token: string, userId: string) {
       throw new InternalServerErrorException('Failed to update preferences');
     }
     return { success: true };
+  }
+
+  async closePastScheduledInstances(token: string, userId: string) {
+    const now = new Date().toISOString();
+    const { error } = await this.getClient(token)
+      .from('task_instances')
+      .update({ status: 'missed' })
+      .eq('user_id', userId)
+      .eq('status', 'scheduled')
+      .lt('end_time', now);
+
+    if (error) {
+      console.error('Close past instances error:', error.message);
+    }
+  }
+
+  async clearFutureScheduledInstances(token: string, userId: string) {
+    const now = new Date().toISOString();
+    const { error } = await this.getClient(token)
+      .from('task_instances')
+      .delete()
+      .eq('user_id', userId)
+      .eq('status', 'scheduled')
+      .gte('start_time', now);
+
+    if (error) {
+      console.error('Clear instances error:', error.message);
+      throw new InternalServerErrorException('Failed to clear old schedule');
+    }
+  }
+
+  async bulkInsertInstances(token: string, userId: string, instances: any[]) {
+    if (instances.length === 0) return;
+    
+    const payload = instances.map(inst => ({
+      user_id: userId,
+      task_id: inst.taskId,
+      start_time: inst.start,
+      end_time: inst.end,
+      status: 'scheduled'
+    }));
+
+    const { error } = await this.getClient(token)
+      .from('task_instances')
+      .insert(payload);
+
+    if (error) {
+      console.error('Bulk insert instances error:', error.message);
+      throw new InternalServerErrorException('Failed to save new schedule');
+    }
   }
 }

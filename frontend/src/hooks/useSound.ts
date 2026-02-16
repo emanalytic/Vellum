@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 
-// Local sound assets located in /public/sounds/
 const SOUNDS = {
   CLICK: '/sounds/click.mp3',      // Pen click
   TABS: '/sounds/tabs.mp3',        // Paper rustle (Tabs/Navigation)
@@ -19,7 +18,6 @@ export const useSound = () => {
     const audio = new Audio(url);
     audio.volume = volume;
     audio.play().catch(() => {
-      // Browsers block audio until first user interaction
     });
   }, []);
 

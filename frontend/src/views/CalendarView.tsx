@@ -25,7 +25,7 @@ interface CalendarViewProps {
   onTabChange?: (tab: any) => void;
 }
 
-const HOUR_HEIGHT = 60; // px per hour row — single source of truth
+const HOUR_HEIGHT = 60;
 
 const formatHour = (h: number) => {
   const ampm = h >= 12 ? "PM" : "AM";
@@ -73,7 +73,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     return seq;
   }, [preferences.availableHours, currentDate, getDayName]);
 
-  // Check if an hour falls within the available window (handles overnight like 14:00→02:00)
   const isHourAvailable = useCallback(
     (h: number, day: string): boolean => {
       const [start, end] = preferences.availableHours[day] || [
@@ -89,108 +88,124 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     [preferences.availableHours],
   );
 
-  // Tasks scheduled for the current day
-  const scheduledTasks = useMemo(
-    () =>
-      tasks.filter((t) => {
-        if (!t.scheduledStart || !t.scheduledEnd) return false;
-        const taskDate = new Date(t.scheduledStart);
-        return taskDate.toDateString() === currentDate.toDateString();
-      }),
-    [tasks, currentDate],
-  );
+  const allScheduledInstances = useMemo(() => {
+    const instances: any[] = [];
+    tasks.forEach(task => {
+      if (task.scheduledStart && task.scheduledEnd) {
+        instances.push({
+          ...task,
+          instanceId: `legacy-${task.id}`,
+          start: task.scheduledStart,
+          end: task.scheduledEnd,
+          instStatus: task.status
+        });
+      }
+
+      if (task.instances) {
+        task.instances.forEach(inst => {
+          instances.push({
+            ...task,
+            instanceId: inst.id,
+            start: inst.start,
+            end: inst.end,
+            instStatus: inst.status
+          });
+        });
+      }
+    });
+
+    return instances.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  }, [tasks]);
+
+  const scheduledInstances = useMemo(() => {
+    return allScheduledInstances.filter(inst => 
+      new Date(inst.start).toDateString() === currentDate.toDateString()
+    );
+  }, [allScheduledInstances, currentDate]);
 
   const unscheduledTasks = useMemo(
     () =>
       tasks.filter(
         (t) =>
           !t.scheduledStart &&
+          (!t.instances || t.instances.length === 0) &&
           t.status !== "completed" &&
           t.status !== "archived",
       ),
     [tasks],
   );
 
-  // Position tasks in columns to avoid visual overlap
-  const positionedTasks = useMemo(() => {
-    if (scheduledTasks.length === 0) return [];
+  const positionedInstances = useMemo(() => {
+    if (scheduledInstances.length === 0) return [];
 
-    const sorted = [...scheduledTasks].sort(
-      (a, b) =>
-        new Date(a.scheduledStart!).getTime() -
-        new Date(b.scheduledStart!).getTime(),
-    );
-
-    // Build clusters of overlapping tasks
-    const clusters: Task[][] = [];
-    for (const t of sorted) {
-      const tStart = new Date(t.scheduledStart!).getTime();
+    const clusters: any[][] = [];
+    for (const inst of scheduledInstances) {
+      const iStart = new Date(inst.start).getTime();
       const lastCluster = clusters[clusters.length - 1];
 
       if (!lastCluster) {
-        clusters.push([t]);
+        clusters.push([inst]);
         continue;
       }
 
-      // Check if this task overlaps with ANY task in the last cluster
       const clusterEnd = Math.max(
-        ...lastCluster.map((ct) => new Date(ct.scheduledEnd!).getTime()),
+        ...lastCluster.map((ci) => new Date(ci.end).getTime()),
       );
-      if (tStart < clusterEnd) {
-        lastCluster.push(t);
+      
+      if (iStart < clusterEnd) {
+        lastCluster.push(inst);
       } else {
-        clusters.push([t]);
+        clusters.push([inst]);
       }
     }
 
-    // Assign columns within each cluster
-    const result: (Task & { _col: number; _maxCol: number })[] = [];
+    const result: (any & { _col: number; _maxCol: number })[] = [];
 
     for (const cluster of clusters) {
-      const columns: Task[][] = [];
-      const taskCols: Map<string, number> = new Map();
+      const columns: any[][] = [];
+      const instCols: Map<string, number> = new Map();
 
-      for (const t of cluster) {
-        const tStart = new Date(t.scheduledStart!).getTime();
+      for (const inst of cluster) {
+        const iStart = new Date(inst.start).getTime();
         let placed = false;
 
         for (let ci = 0; ci < columns.length; ci++) {
           const lastInCol = columns[ci][columns[ci].length - 1];
-          if (tStart >= new Date(lastInCol.scheduledEnd!).getTime()) {
-            columns[ci].push(t);
-            taskCols.set(t.id, ci);
+          if (iStart >= new Date(lastInCol.end).getTime()) {
+            columns[ci].push(inst);
+            instCols.set(inst.instanceId, ci);
             placed = true;
             break;
           }
         }
 
         if (!placed) {
-          columns.push([t]);
-          taskCols.set(t.id, columns.length - 1);
+          columns.push([inst]);
+          instCols.set(inst.instanceId, columns.length - 1);
         }
       }
 
       const maxCol = columns.length;
-      for (const t of cluster) {
-        result.push({ ...t, _col: taskCols.get(t.id) || 0, _maxCol: maxCol });
+      for (const inst of cluster) {
+        result.push({ ...inst, _col: instCols.get(inst.instanceId) || 0, _maxCol: maxCol });
       }
     }
 
     return result;
-  }, [scheduledTasks]);
+  }, [scheduledInstances]);
 
-  // Calculate pixel position for a task based on its time + the hourSequence
+  // Calculate pixel position for an instance based on its time + the hourSequence
   const getTaskStyle = useCallback(
-    (task: Task & { _col: number; _maxCol: number }): React.CSSProperties => {
-      const start = new Date(task.scheduledStart!);
-      const end = new Date(task.scheduledEnd!);
-      const taskStartHour = start.getHours();
+    (inst: any & { _col: number; _maxCol: number }): React.CSSProperties => {
+      const start = new Date(inst.start);
+      const end = new Date(inst.end);
+      const instStartHour = start.getHours();
 
       // Find this hour's index in our sequence
-      let seqIndex = hourSequence.indexOf(taskStartHour);
+      let seqIndex = hourSequence.indexOf(instStartHour);
       if (seqIndex === -1) {
         const seqStart = hourSequence[0];
-        seqIndex = (taskStartHour - seqStart + 24) % 24;
+        seqIndex = (instStartHour - seqStart + 24) % 24;
       }
 
       const startMinutes = start.getMinutes();
@@ -202,8 +217,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       const top = seqIndex * HOUR_HEIGHT + (startMinutes / 60) * HOUR_HEIGHT;
       const height = Math.max((durationMinutes / 60) * HOUR_HEIGHT, 20);
 
-      const totalCols = task._maxCol || 1;
-      const col = task._col || 0;
+      const totalCols = inst._maxCol || 1;
+      const col = inst._col || 0;
       const colWidth = 100 / totalCols;
       const left = col * colWidth;
       // Always have a small gap for visual "card" look
@@ -498,21 +513,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                     );
                   })}
 
-                  {/* Scheduled Tasks Layer - absolutely positioned over the grid rows */}
-                  {positionedTasks.map((task) => {
-                    const style = getTaskStyle(task);
+                  {/* Scheduled Instances Layer - absolutely positioned over the grid rows */}
+                  {positionedInstances.map((inst) => {
+                    const style = getTaskStyle(inst);
                     const heightNum = parseFloat(String(style.height));
                     const isCompact = heightNum < 36;
                     const isTiny = heightNum < 24;
 
                     return (
                       <div
-                        key={task.id}
+                        key={inst.instanceId}
                         onClick={(e) => {
                           e.stopPropagation();
-                          onTaskClick?.(task);
+                          onTaskClick?.(inst);
                         }}
-                        className={`rounded-sm overflow-hidden flex flex-col cursor-pointer transition-all border-2 border-ink/15 hover:border-ink/40 shadow-sm hover:shadow-md group/task border-l-4 ${getPriorityBorderColor(task.priority)} ${getPriorityBg(task.priority)}`}
+                        className={`rounded-sm overflow-hidden flex flex-col cursor-pointer transition-all border-2 border-ink/15 hover:border-ink/40 shadow-sm hover:shadow-md group/task border-l-4 ${getPriorityBorderColor(inst.priority)} ${getPriorityBg(inst.priority)}`}
                         style={style}
                       >
                         <div
@@ -522,20 +537,20 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                             <p
                               className={`marker-text leading-tight flex-1 truncate ${isTiny ? "text-[9px]" : isCompact ? "text-[11px]" : "text-xs md:text-sm"}`}
                             >
-                              {task.description}
+                              {inst.description}
                             </p>
-                            {!isTiny && task._maxCol <= 2 && (
+                            {!isTiny && inst._maxCol <= 2 && (
                               <Clock
                                 size={isCompact ? 9 : 12}
                                 className="text-ink/20 group-hover/task:text-highlighter-pink transition-colors shrink-0 mt-0.5"
                               />
                             )}
                           </div>
-                          {!isCompact && task._maxCol <= 2 && (
+                          {!isCompact && inst._maxCol <= 2 && (
                             <div className="flex justify-between items-center opacity-80 font-sketch text-[7px] md:text-[9px] pt-0.5 mt-auto">
                               <span className="font-bold">
                                 {new Date(
-                                  task.scheduledStart!,
+                                  inst.start,
                                 ).toLocaleTimeString([], {
                                   hour: "numeric",
                                   minute: "2-digit",
@@ -543,11 +558,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                                 })}
                               </span>
                               <div className="flex items-center gap-1">
-                                {task.status === "completed" && (
+                                {inst.instStatus === "completed" && (
                                   <Check size={8} className="text-green-600" />
                                 )}
                                 <span className="bg-ink text-white px-1 py-px uppercase text-[6px] md:text-[7px] font-black rounded-[2px]">
-                                  {task.priority}
+                                  {inst.priority}
                                 </span>
                               </div>
                             </div>
@@ -572,7 +587,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                         (now.getMinutes() / 60) * HOUR_HEIGHT;
                       return (
                         <div
-                          className="absolute left-0 right-0 z-[25] pointer-events-none flex items-center"
+                          className="absolute left-0 right-0 z-20 pointer-events-none flex items-center"
                           style={{ top: `${topPx}px` }}
                         >
                           <div className="w-2.5 h-2.5 rounded-full bg-highlighter-pink border-2 border-white shadow-md -ml-1 shrink-0" />
@@ -588,17 +603,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             <div className="flex flex-1 overflow-x-auto p-3 gap-3 custom-scrollbar bg-paper-bg/30">
               {weekDates.map((date) => {
                 const dName = getDayName(date);
-                const dayTasks = tasks.filter((t) => {
-                  if (t.scheduledStart) {
-                    return (
-                      new Date(t.scheduledStart).toDateString() ===
-                      date.toDateString()
-                    );
-                  }
-                  return (
-                    t.deadline &&
-                    new Date(t.deadline).toDateString() === date.toDateString()
-                  );
+                const dayInstances = allScheduledInstances.filter((inst) => {
+                  return new Date(inst.start).toDateString() === date.toDateString();
                 });
                 const isToday =
                   date.toDateString() === new Date().toDateString();
@@ -619,7 +625,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                       </span>
                     </div>
                     <div className="flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-                      {dayTasks.length === 0 && (
+                      {dayInstances.length === 0 && (
                         <p className="text-center font-hand text-sm opacity-20 italic py-6">
                           Empty canvas
                           {onTabChange && (
@@ -632,33 +638,31 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                           )}
                         </p>
                       )}
-                      {dayTasks.map((task) => (
+                      {dayInstances.map((inst) => (
                         <div
-                          key={task.id}
-                          onClick={() => onTaskClick?.(task)}
+                          key={inst.instanceId}
+                          onClick={() => onTaskClick?.(inst)}
                           className={`p-2.5 sketch-border bg-white text-xs shadow-sm hover:scale-[1.03] transition-transform cursor-pointer border-l-[6px] ${
-                            task.priority === "high"
+                            inst.priority === "high"
                               ? "border-l-highlighter-pink"
-                              : task.priority === "medium"
+                              : inst.priority === "medium"
                                 ? "border-l-highlighter-yellow"
                                 : "border-l-green-400"
-                          }`}
+                          } ${inst.instStatus === 'completed' ? 'opacity-50' : ''}`}
                         >
                           <p className="font-hand text-base md:text-lg font-bold leading-tight line-clamp-2">
-                            {task.description}
+                            {inst.description}
                           </p>
-                          {task.scheduledStart && (
-                            <p className="font-mono text-[9px] mt-1 opacity-50">
-                              {new Date(task.scheduledStart).toLocaleTimeString(
-                                [],
-                                {
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                },
-                              )}
-                            </p>
-                          )}
+                          <p className="font-mono text-[9px] mt-1 opacity-50">
+                            {new Date(inst.start).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true,
+                              },
+                            )}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -728,7 +732,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               <div className="flex justify-between items-center font-sketch text-xs opacity-60">
                 <span>Scheduled today</span>
                 <span className="font-bold text-ink">
-                  {scheduledTasks.length}
+                  {scheduledInstances.length}
                 </span>
               </div>
               <div className="flex justify-between items-center font-sketch text-xs opacity-60">
@@ -769,7 +773,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               {/* Close Button */}
               <button
                 onClick={() => setActiveSlot(null)}
-                className="absolute top-3 right-3 p-1.5 hover:bg-ink/10 rounded-full transition-colors z-10"
+                className="absolute top-0 right-0 p-1 bg-white/10 rounded-full hover:bg-white/20 transition-colors z-20"
               >
                 <X size={20} className="text-ink/50" />
               </button>
