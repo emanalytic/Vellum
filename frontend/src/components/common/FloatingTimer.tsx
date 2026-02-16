@@ -35,7 +35,7 @@ const FloatingTimer: React.FC<FloatingTimerProps> = ({ task, onUpdate }) => {
         initial={{ y: 150, opacity: 0, scale: 0.5 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: 150, opacity: 0, scale: 0.5 }}
-        className="fixed bottom-6 md:bottom-10 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[60] group"
+        className="fixed bottom-6 md:bottom-10 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-60 group"
       >
         {/* Shadow/Back Layer */}
         <div className="absolute inset-0 bg-ink translate-x-1 translate-y-1 md:translate-x-2 md:translate-y-2 rounded-3xl opacity-20 blur-sm" />

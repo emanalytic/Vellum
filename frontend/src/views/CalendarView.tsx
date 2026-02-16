@@ -22,6 +22,7 @@ interface CalendarViewProps {
   onAddTaskAtTime?: (date: Date, hour: number) => void;
   onTaskClick?: (task: Task) => void;
   onScheduleTask?: (taskId: string, date: Date, hour: number) => void;
+  onDeleteTask?: (taskId: string) => void;
   onTabChange?: (tab: any) => void;
 }
 
@@ -40,6 +41,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   onAddTaskAtTime,
   onTaskClick,
   onScheduleTask,
+  onDeleteTask,
   onTabChange,
 }) => {
   const { playClick, playTabs, playPop } = useSound();
@@ -87,6 +89,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     },
     [preferences.availableHours],
   );
+
+  const weekDates = useMemo(() => {
+    const startOfWeek = new Date(currentDate);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+    startOfWeek.setDate(diff);
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      return d;
+    });
+  }, [currentDate]);
 
   const allScheduledInstances = useMemo(() => {
     const instances: any[] = [];
@@ -292,17 +307,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     return q[Math.floor(Math.random() * q.length)];
   }, []);
 
-  const weekDates = useMemo(() => {
-    const dates = [];
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(startOfWeek);
-      d.setDate(startOfWeek.getDate() + i);
-      dates.push(d);
-    }
-    return dates;
-  }, [currentDate]);
 
   const navigateDate = useCallback(
     (direction: number) => {
@@ -651,9 +655,22 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                                 : "border-l-green-400"
                           } ${inst.instStatus === 'completed' ? 'opacity-50' : ''}`}
                         >
-                          <p className="font-hand text-base md:text-lg font-bold leading-tight line-clamp-2">
-                            {inst.description}
-                          </p>
+                          <div className="flex justify-between items-start gap-2">
+                            <p className="font-hand text-base md:text-lg font-bold leading-tight line-clamp-2">
+                              {inst.description}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm("Abandon this task?")) {
+                                  onDeleteTask?.(inst.id);
+                                }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-highlighter-pink transition-opacity"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
                           <p className="font-mono text-[9px] mt-1 opacity-50">
                             {new Date(inst.start).toLocaleTimeString(
                               [],

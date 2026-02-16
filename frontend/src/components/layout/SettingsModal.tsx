@@ -43,7 +43,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-ink/20 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-ink/20 backdrop-blur-sm transition-opacity">
       <div className="bg-paper-bg w-full max-w-md sketch-border relative p-8 shadow-2xl">
         {/* Tape Effect */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-8 bg-highlighter-blue/30 rotate-1 shadow-sm pointer-events-none" />
@@ -141,9 +141,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       soundEnabled: !preferences.soundEnabled
                     });
                   }}
-                  className={`w-10 h-5 rounded-full relative transition-colors duration-300 border-2 border-ink ${preferences.soundEnabled ? 'bg-highlighter-pink' : 'bg-paper-bg'}`}
+                  className={`w-12 h-6 rounded-full relative transition-colors duration-300 border-2 border-ink flex items-center ${preferences.soundEnabled ? 'bg-highlighter-pink' : 'bg-paper-bg'}`}
                >
-                  <div className={`absolute top-0.5 w-3 h-3 bg-white border border-ink rounded-full transition-all duration-300 shadow-sm ${preferences.soundEnabled ? 'left-5' : 'left-0.5'}`} />
+                  <div className={`absolute w-3.5 h-3.5 bg-white border border-ink rounded-full transition-all duration-300 shadow-sm ${preferences.soundEnabled ? 'left-6' : 'left-1'}`} />
                </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { UpsertTaskDto } from './dto/task.dto';
 import { LogProgressDto } from './dto/log-progress.dto';
 import { PreferencesDto } from './dto/preferences.dto';
+import { Task, UserPreferences } from './types';
 
 @Injectable()
 export class TasksService {
@@ -48,6 +49,7 @@ async findAll(token: string, userId: string) {
       })),
       instances: (t.task_instances || []).map((inst: any) => ({
         id: inst.id,
+        taskId: inst.task_id,
         start: inst.start_time,
         end: inst.end_time,
         status: inst.status,

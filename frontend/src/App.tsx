@@ -458,6 +458,7 @@ function App() {
                 }}
                 onTaskClick={(task: Task) => setEditingTaskId(task.id)}
                 onScheduleTask={handleScheduleTask}
+                onDeleteTask={deleteTask}
                 onTabChange={setActiveTab}
               />
             )}

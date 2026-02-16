@@ -1,25 +1,29 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { TasksService } from '../tasks/tasks.service';
 import { ScheduleDto } from './dto/schedule.dto';
+import { Task, TaskInstance, UserPreferences } from '../tasks/types';
 
+interface TimeSlot {
+  start: number;
+  end: number;
+  taskId: string;
+}
 
 @Injectable()
 export class SchedulerService {
-  constructor(private readonly tasksService: TasksService) {}
+  private readonly PRIORITY_WEIGHTS = { high: 3, medium: 2, low: 1 };
+  private readonly SLOT_GRANULARITY_MS = 15 * 60000;
+  private readonly DEFAULT_DURATION_MINUTES = 60;
+  private readonly DEFAULT_DAYS_TO_SCHEDULE = 3;
 
-  private readonly PRIORITY_WEIGHTS: Record<string, number> = {
-    high: 3,
-    medium: 2,
-    low: 1,
-  };
+  constructor(private readonly tasksService: TasksService) {}
 
   async scheduleTasks(
     token: string,
     userId: string,
     scheduleDto?: ScheduleDto,
   ) {
-    const preferences = await this.tasksService.getPreferences(token, userId);
-
+    const preferences: any = await this.tasksService.getPreferences(token, userId);
     if (!preferences) {
       throw new InternalServerErrorException(
         'User preferences not found. Please configure your available hours first.',
@@ -27,230 +31,272 @@ export class SchedulerService {
     }
 
     const clientTz = scheduleDto?.timezone || 'UTC';
-    const now = new Date();
-    const daysToSchedule = scheduleDto?.daysToSchedule || 3;
+    const now = Date.now();
+    const daysToSchedule = scheduleDto?.daysToSchedule || this.DEFAULT_DAYS_TO_SCHEDULE;
 
-    await this.tasksService.closePastScheduledInstances(token, userId);
-    await this.tasksService.clearFutureScheduledInstances(token, userId);
+    await Promise.all([
+      this.tasksService.closePastScheduledInstances(token, userId),
+      this.tasksService.clearFutureScheduledInstances(token, userId),
+    ]);
 
-    const tasks = await this.tasksService.findAll(token, userId);
-    const existingInstances = tasks.flatMap(t => t.instances || []);
-
-    const tasksToSchedule = tasks.filter(t => !['completed', 'archived'].includes(t.status));
+    const tasks: any[] = await this.tasksService.findAll(token, userId);
+    const activeTasks = tasks.filter(t => !['completed', 'archived'].includes(t.status));
     
-    tasksToSchedule.sort((a, b) => {
-      const pA = this.PRIORITY_WEIGHTS[a.priority] || 0;
-      const pB = this.PRIORITY_WEIGHTS[b.priority] || 0;
-      if (pB !== pA) return pB - pA;
-
+    activeTasks.sort((a, b) => {
+      const pDiff = (this.PRIORITY_WEIGHTS[b.priority] || 0) - (this.PRIORITY_WEIGHTS[a.priority] || 0);
+      if (pDiff !== 0) return pDiff;
       const dA = a.deadline ? new Date(a.deadline).getTime() : Infinity;
       const dB = b.deadline ? new Date(b.deadline).getTime() : Infinity;
       return dA - dB;
     });
 
-    const peakHours = this.analyzePeakHours(tasks);
-    const hasPeakData = Array.from(peakHours.values()).reduce((a, b) => a + b, 0) > 60;
+    const existingSlots = this.buildTimeSlots(tasks.flatMap(t => t.instances || []));
+    const peakHours = this.buildPeakHoursMap(tasks);
+    
+    const scheduled = this.fastSchedule(
+      activeTasks,
+      existingSlots,
+      peakHours,
+      preferences,
+      clientTz,
+      now,
+      daysToSchedule,
+    );
 
-    const scheduledInstances: any[] = [];
+    const totalRequested = activeTasks.reduce(
+      (sum, t) => sum + (t.targetSessionsPerDay || 1) * daysToSchedule,
+      0,
+    );
 
-    // Local overlap check helper
-    const isSlotAvailable = (start: Date, end: Date): boolean => {
-      const s = start.getTime();
-      const e = end.getTime();
+    await this.tasksService.bulkInsertInstances(token, userId, scheduled);
 
-      // Check against new instances we are placing
-      const collidesWithNew = scheduledInstances.some(inst => {
-        const iStart = new Date(inst.start).getTime();
-        const iEnd = new Date(inst.end).getTime();
-        return (s < iEnd && e > iStart);
-      });
-      if (collidesWithNew) return false;
-
-      // Check against existing instances in DB (completed, manual, etc.)
-      const collidesWithExisting = existingInstances.some(inst => {
-        const iStart = new Date(inst.start).getTime();
-        const iEnd = new Date(inst.end).getTime();
-        return (s < iEnd && e > iStart);
-      });
-
-      return !collidesWithExisting;
+    return {
+      scheduledCount: scheduled.length,
+      unschedulableCount: Math.max(0, totalRequested - scheduled.length),
+      schedule: scheduled,
     };
+  }
 
-    // 4. Placement Loop
-    for (const task of tasksToSchedule) {
-      const durationMins = this.parseDuration(task.estimatedTime);
-      const repsPerDay = task.targetSessionsPerDay || 1;
-      const minSpacingMs = (task.minSpacingMinutes || 60) * 60000;
+  private buildTimeSlots(instances: any[]): TimeSlot[] {
+    return instances.map(inst => ({
+      start: new Date(inst.start).getTime(),
+      end: new Date(inst.end).getTime(),
+      taskId: inst.taskId || inst.task_id,
+    }));
+  }
 
-      for (let dayOffset = 0; dayOffset < daysToSchedule; dayOffset++) {
-        const dayBase = new Date(now);
-        dayBase.setDate(now.getDate() + dayOffset);
-        
-        // Generate potential 15-min slots for this day
-        const daySlots = this.generateScoredSlots(
-          dayBase,
-          preferences,
-          peakHours,
-          hasPeakData,
-          clientTz,
-        );
-
-        // Filter out past slots and sort by productivity score (Peak Hours)
-        const candidates = daySlots
-          .filter(s => s.time.getTime() > now.getTime())
-          .sort((a, b) => b.score - a.score);
-
-        const dayStr = dayBase.toDateString();
-        let placedToday = existingInstances.filter(inst => 
-          inst.taskId === task.id && new Date(inst.start).toDateString() === dayStr
-        ).length;
-
-        for (const candidate of candidates) {
-          if (placedToday >= repsPerDay) break;
-
-          const slotStart = candidate.time;
-          const slotEnd = new Date(slotStart.getTime() + durationMins * 60000);
-
-          if (task.deadline) {
-            const deadlineDate = new Date(task.deadline).getTime();
-            if (slotEnd.getTime() > deadlineDate) continue;
-          }
-
-          const { end: windowEnd } = this.getAvailableWindow(slotStart, preferences, clientTz);
-          if (slotEnd.getTime() > windowEnd.getTime()) continue;
-
-          if (!isSlotAvailable(slotStart, slotEnd)) continue;
-
-          const tStart = slotStart.getTime();
-
-          const tooCloseToNew = scheduledInstances.some(inst => {
-            if (inst.taskId !== task.id) return false;
-            return Math.abs(new Date(inst.start).getTime() - tStart) < minSpacingMs;
-          });
-          if (tooCloseToNew) continue;
-
-          const tooCloseToExisting = existingInstances.some(inst => {
-            if (inst.taskId !== task.id) return false;
-            return Math.abs(new Date(inst.start).getTime() - tStart) < minSpacingMs;
-          });
-          if (tooCloseToExisting) continue;
-
-          // Commit slot
-          scheduledInstances.push({
-            taskId: task.id,
-            start: slotStart.toISOString(),
-            end: slotEnd.toISOString(),
-          });
-          placedToday++;
+  private buildPeakHoursMap(tasks: any[]): number[] {
+    const hours = new Array(24).fill(0);
+    for (const task of tasks) {
+      for (const log of task.history || []) {
+        if (log.startTime) {
+          hours[new Date(log.startTime).getHours()]++;
         }
       }
     }
-
-    let totalRequestedSessions = 0;
-    for (const task of tasksToSchedule) {
-      totalRequestedSessions += (task.targetSessionsPerDay || 1) * daysToSchedule;
-    }
-
-    const unschedulableCount = Math.max(0, totalRequestedSessions - scheduledInstances.length);
-
-    await this.tasksService.bulkInsertInstances(token, userId, scheduledInstances);
-
-    return {
-      scheduledCount: scheduledInstances.length,
-      unschedulableCount,
-      schedule: scheduledInstances,
-    };
+    return hours;
   }
 
-
-  private parseDuration(input: string | number): number {
-    if (typeof input === 'number') return input;
-    if (!input) return 60;
-    let totalMins = 0;
-    const hours = input.match(/(\d+(\.\d+)?)h/);
-    const mins = input.match(/(\d+)m/);
-    if (hours) totalMins += parseFloat(hours[1]) * 60;
-    if (mins) totalMins += parseInt(mins[1]);
-    if (!hours && !mins && !isNaN(Number(input))) return Number(input);
-    return totalMins || 60;
-  }
-
-  private analyzePeakHours(tasks: any[]): Map<number, number> {
-    const hourScores = new Map<number, number>();
-    for (let h = 0; h < 24; h++) hourScores.set(h, 0);
-    const allLogs = tasks.flatMap(t => t.history || []);
-    allLogs.forEach((log: any) => {
-      if (!log.startTime) return;
-      const hour = new Date(log.startTime).getHours();
-      hourScores.set(hour, (hourScores.get(hour) || 0) + 1);
-    });
-    return hourScores;
-  }
-
-  private generateScoredSlots(
-    dayBase: Date,
+  private fastSchedule(
+    tasks: any[],
+    existingSlots: TimeSlot[],
+    peakHours: number[],
     preferences: any,
-    peakHours: Map<number, number>,
-    hasPeakData: boolean,
     tz: string,
-  ): { time: Date; score: number }[] {
-    const { start, end } = this.getAvailableWindow(dayBase, preferences, tz);
-    const slots: { time: Date; score: number }[] = [];
-    
-    let cursor = new Date(start);
-    while (cursor.getTime() < end.getTime()) {
-      const hour = this.getHourInTz(cursor, tz);
-      // Base score is 5 if no data, otherwise frequency of past success
-      const score = hasPeakData ? (peakHours.get(hour) || 0) : 5;
-      
-      slots.push({ time: new Date(cursor), score });
-      cursor.setTime(cursor.getTime() + 15 * 60000); // 15-minute granularity
+    now: number,
+    days: number,
+  ): any[] {
+    const scheduled: any[] = [];
+    const occupiedSlots: TimeSlot[] = [...existingSlots];
+    const taskSlots = new Map<string, number[]>();
+
+    const dayWindows = this.precomputeDayWindows(now, days, preferences, tz);
+    const hasPeakData = peakHours.reduce((a, b) => a + b, 0) > 60;
+    const scoreMap = this.buildScoreMap(peakHours, hasPeakData);
+
+    for (const task of tasks) {
+      const duration = this.parseDuration(task.estimatedTime) * 60000;
+      const repsPerDay = task.targetSessionsPerDay || 1;
+      const minSpacing = (task.minSpacingMinutes || 60) * 60000;
+
+      const taskTimes = taskSlots.get(task.id) || [];
+      const existingForTask = existingSlots.filter(s => s.taskId === task.id).map(s => s.start);
+      taskTimes.push(...existingForTask);
+
+      for (let day = 0; day < days; day++) {
+        const window = dayWindows[day];
+        if (!window) continue;
+
+        const dayStart = window.start;
+        const dayEnd = window.end;
+        const existingToday = taskTimes.filter(t => t >= dayStart && t < dayEnd).length;
+        let placedToday = existingToday;
+
+        const candidates = this.generateScoredCandidates(
+          window.start,
+          window.end,
+          scoreMap,
+          tz,
+          now,
+        );
+
+        for (const { time, score } of candidates) {
+          if (placedToday >= repsPerDay) break;
+
+          const slotEnd = time + duration;
+          if (slotEnd > window.end) continue;
+
+          // Deadline Constraint
+          if (task.deadline) {
+            const deadlineDate = new Date(task.deadline).getTime();
+            if (slotEnd > deadlineDate) continue;
+          }
+
+          if (this.hasCollision(time, slotEnd, occupiedSlots)) continue;
+          if (this.violatesSpacing(time, taskTimes, minSpacing)) continue;
+
+          const slot = { start: time, end: slotEnd, taskId: task.id };
+          occupiedSlots.push(slot);
+          taskTimes.push(time);
+          
+          scheduled.push({
+            taskId: task.id,
+            start: new Date(time).toISOString(),
+            end: new Date(slotEnd).toISOString(),
+          });
+
+          placedToday++;
+        }
+
+        taskSlots.set(task.id, taskTimes);
+      }
     }
-    return slots;
+
+    return scheduled;
   }
 
-  private getHourInTz(date: Date, tz: string): number {
-    const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', hour12: false }).formatToParts(date);
-    const hour = parts.find(p => p.type === 'hour')?.value;
-    return parseInt(hour || '0');
+  private precomputeDayWindows(
+    now: number,
+    days: number,
+    preferences: any,
+    tz: string,
+  ): Array<{ start: number; end: number; day: string }> {
+    const windows: Array<{ start: number; end: number; day: string }> = [];
+    const DAY_MS = 86400000;
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date(now + i * DAY_MS);
+      const dayName = this.getDayName(date, tz);
+      const hostHours = preferences.availableHours[dayName] || ['09:00', '17:00'];
+      const [startH, startM, endH, endM] = this.parseTimeRange(hostHours);
+
+      const start = this.getTimestamp(date, startH, startM, tz);
+      let end = this.getTimestamp(date, endH, endM, tz);
+      
+      if (end <= start) end += DAY_MS;
+
+      windows.push({ start, end, day: dayName });
+    }
+
+    return windows;
   }
 
-  private getDayNameInTz(date: Date, tz: string): string {
-    return new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'long' }).format(date);
+  private buildScoreMap(peakHours: number[], hasPeakData: boolean): Map<number, number> {
+    const map = new Map<number, number>();
+    for (let h = 0; h < 24; h++) {
+      map.set(h, hasPeakData ? peakHours[h] || 0 : 5);
+    }
+    return map;
   }
 
-  private setTimeInTz(baseDate: Date, hour: number, minute: number, tz: string): Date {
+  private generateScoredCandidates(
+    start: number,
+    end: number,
+    scoreMap: Map<number, number>,
+    tz: string,
+    now: number,
+  ): Array<{ time: number; score: number }> {
+    const candidates: Array<{ time: number; score: number }> = [];
+    let time = start;
+
+    while (time < end) {
+      if (time > now) {
+        const hour = new Date(time).getHours(); 
+        candidates.push({
+          time,
+          score: scoreMap.get(hour) || 0,
+        });
+      }
+      time += this.SLOT_GRANULARITY_MS;
+    }
+
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates;
+  }
+
+  private hasCollision(start: number, end: number, slots: TimeSlot[]): boolean {
+    for (const slot of slots) {
+      if (start < slot.end && end > slot.start) return true;
+    }
+    return false;
+  }
+
+  private violatesSpacing(time: number, taskTimes: number[], minSpacing: number): boolean {
+    for (const t of taskTimes) {
+      if (Math.abs(time - t) < minSpacing) return true;
+    }
+    return false;
+  }
+
+  private parseTimeRange(range: [string, string]): [number, number, number, number] {
+    const [sh, sm] = range[0].split(':').map(Number);
+    const [eh, em] = range[1].split(':').map(Number);
+    return [sh, sm, eh, em];
+  }
+
+  private getTimestamp(date: Date, hour: number, minute: number, tz: string): number {
     const formatter = new Intl.DateTimeFormat('en-US', { 
-        timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' 
+      timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' 
     });
-    const parts = formatter.formatToParts(baseDate);
+    const parts = formatter.formatToParts(date);
     const y = parts.find(p => p.type === 'year')?.value;
     const m = parts.find(p => p.type === 'month')?.value;
     const d = parts.find(p => p.type === 'day')?.value;
     
-    // Create an ISO-like string for the target timezone
+    // Create UTC-normalized date string for the target TZ
     const targetIso = `${y}-${m}-${d}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
     const tempUtc = new Date(targetIso + 'Z');
     
-    // Adjust by calculating the difference between the created UTC and the desired TZ hour
-    const checkHour = this.getHourInTz(tempUtc, tz);
+    // Calculate the drift by checking what hour that UTC timestamp represents in the target TZ
+    const checkParts = new Intl.DateTimeFormat('en-US', { 
+      timeZone: tz, hour: 'numeric', hour12: false 
+    }).formatToParts(tempUtc);
+    const checkHour = parseInt(checkParts.find(p => p.type === 'hour')?.value || '0');
+    
     const diff = hour - checkHour;
-    return new Date(tempUtc.getTime() + diff * 3600000);
+    return tempUtc.getTime() + diff * 3600000;
   }
 
-  private getAvailableWindow(baseDate: Date, preferences: any, tz: string): { start: Date; end: Date } {
-    const dayName = this.getDayNameInTz(baseDate, tz);
-    const [startStr, endStr] = preferences.availableHours[dayName] || ['09:00', '17:00'];
-    
-    const [hS, mS] = startStr.split(':').map(Number);
-    const [hE, mE] = endStr.split(':').map(Number);
-
-    const start = this.setTimeInTz(baseDate, hS, mS, tz);
-    let end = this.setTimeInTz(baseDate, hE, mE, tz);
-
-    if (end.getTime() <= start.getTime()) {
-      end.setDate(end.getDate() + 1);
+  private getDayName(date: Date, tz: string): string {
+    try {
+      return new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'long' }).format(date);
+    } catch {
+      return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
     }
-    return { start, end };
+  }
+
+  private parseDuration(input: string | number): number {
+    if (typeof input === 'number') return input;
+    if (!input) return this.DEFAULT_DURATION_MINUTES;
+
+    const hMatch = input.match(/(\d+(?:\.\d+)?)h/);
+    const mMatch = input.match(/(\d+)m/);
+    
+    let total = 0;
+    if (hMatch) total += parseFloat(hMatch[1]) * 60;
+    if (mMatch) total += parseInt(mMatch[1], 10);
+    if (!hMatch && !mMatch && !isNaN(Number(input))) return Number(input);
+    
+    return total || this.DEFAULT_DURATION_MINUTES;
   }
 }
