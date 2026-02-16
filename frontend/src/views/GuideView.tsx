@@ -9,143 +9,156 @@ import {
   Clock,
   Pencil,
   BarChart3,
+  Moon,
+  Sun,
+  Archive,
+  MousePointer2,
+  CheckCircle2,
+  Quote
 } from 'lucide-react';
 
 const GuideView: React.FC = () => {
   return (
-    <div className="max-w-6xl mx-auto py-12 px-4 md:px-12 pb-48 space-y-32">
+    <div className="max-w-4xl mx-auto py-10 px-6 pb-32 space-y-24">
       
       {/* ─── Header ─── */}
-      <header className="text-center space-y-8 relative">
-        <h1 className="marker-text text-6xl md:text-8xl">
-          User Manual
+      <header className="text-center space-y-4 relative">
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-12 bg-highlighter-yellow/20 -rotate-2 blur-xl" />
+        <h1 className="marker-text text-5xl md:text-6xl text-ink">
+          The Manual
         </h1>
-        <p className="font-hand text-3xl md:text-4xl text-ink/60 max-w-3xl mx-auto leading-relaxed">
-          How to use this app.
+        <p className="font-hand text-xl md:text-2xl text-ink/50 max-w-xl mx-auto italic">
+          Everything you need to know about navigating your workflow.
         </p>
       </header>
 
       {/* ─── 0. NAVIGATION ─── */}
-      <section className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
-        <div className="md:text-right sticky top-24">
-          <h2 className="marker-text text-4xl mb-4 flex md:justify-end items-center gap-3">
-             <Settings className="text-ink" size={32} />
+      <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
+        <div className="md:text-right sticky top-24 pt-2">
+          <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
+             <Settings className="text-ink" size={20} />
              Navigation
           </h2>
-          <p className="font-hand text-xl text-ink/60">Where to find everything.</p>
+          <p className="font-hand text-base text-ink/40">Getting around.</p>
         </div>
-        <div className="space-y-8">
-           <div className="sketch-border bg-white p-8 shadow-sm">
-             <h3 className="font-marker text-2xl mb-6">The Sidebar</h3>
-             <ul className="space-y-6 font-hand text-xl">
-               <li className="flex items-start gap-4">
-                 <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center shrink-0 mt-1"><LayoutDashboard size={18} /></div>
-                 <div>
-                    <strong>Tasks Tab:</strong> This is your main list where you add new things to do.
-                 </div>
+        
+        <div className="space-y-6">
+           <div className="sketch-border bg-white p-6 shadow-sm relative overflow-hidden group">
+             {/* Tape Effect */}
+             <div className="absolute -top-1 -left-4 w-12 h-6 bg-highlighter-pink/20 -rotate-12" />
+             
+             <h3 className="font-marker text-lg mb-4 text-ink/80">The Sidebar</h3>
+             <ul className="space-y-4 font-hand text-base leading-snug">
+               <li className="flex items-start gap-3">
+                 <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><LayoutDashboard size={14} /></div>
+                 <span><strong>Tasks:</strong> Your main board. This is where you scribble new ideas and manage active work.</span>
                </li>
-               <li className="flex items-start gap-4">
-                 <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center shrink-0 mt-1"><Calendar size={18} /></div>
-                 <div>
-                    <strong>Calendar Tab:</strong> This shows your tasks on a 24-hour timeline.
-                 </div>
+               <li className="flex items-start gap-3">
+                 <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><Calendar size={14} /></div>
+                 <span><strong>Calendar:</strong> Your interactive timeline for visualizing the hours ahead.</span>
                </li>
-               <li className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center shrink-0 mt-1"><BarChart3 size={18} /></div>
-                 <div>
-                    <strong>Analytics Tab:</strong> See charts of how much time you've spent on tasks.
-                 </div>
+               <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><BarChart3 size={14} /></div>
+                 <span><strong>Analytics:</strong> Deep dives into how you're spending your focus time.</span>
                </li>
-               <li className="flex items-start gap-4">
-                 <div className="w-8 h-8 rounded bg-ink/5 flex items-center justify-center shrink-0 mt-1"><Settings size={18} /></div>
-                 <div>
-                    <strong>Settings:</strong> At the bottom of the sidebar. You can set your name and your working hours here.
-                 </div>
+               <li className="flex items-start gap-3">
+                 <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><Settings size={14} /></div>
+                 <span><strong>Settings:</strong> Tucked at the bottom. Use this to toggle your identity and core work hours.</span>
                </li>
              </ul>
            </div>
         </div>
       </section>
 
-      {/* ─── 1. TASKS ─── */}
-      <section className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
-        <div className="md:text-right sticky top-24">
-          <h2 className="marker-text text-4xl mb-4 flex md:justify-end items-center gap-3">
-             <Pencil className="text-highlighter-blue" size={32} />
-             Work with Tasks
+      {/* ─── 1. TODAY'S CANVAS ─── */}
+      <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
+        <div className="md:text-right sticky top-24 pt-2">
+          <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
+             <Pencil className="text-highlighter-blue" size={20} />
+             The Canvas
           </h2>
-          <p className="font-hand text-xl text-ink/60">Adding and organizing.</p>
+          <p className="font-hand text-base text-ink/40">Task Management.</p>
         </div>
-        <div className="space-y-10">
-           <div className="sketch-border bg-white p-8 relative">
-             <h3 className="font-marker text-2xl mb-6">How to Add a Task</h3>
-             <p className="font-hand text-xl leading-relaxed mb-8">
-               Go to the <strong>Tasks</strong> tab and type what you need to do in the input box.
+        
+        <div className="space-y-8">
+           <div className="sketch-border bg-white p-6 relative">
+             <h3 className="font-marker text-lg mb-4">Adding a Task</h3>
+             <p className="font-hand text-base mb-6 opacity-70">
+               Click the plus button at the top of <strong>Today's Canvas</strong> to begin.
              </p>
-             <div className="grid sm:grid-cols-2 gap-8">
-                <div className="space-y-3 border-l-4 border-highlighter-blue pl-4">
-                  <h4 className="font-marker text-xl flex items-center gap-2"><Target size={18}/> Skill & Priority</h4>
-                  <p className="font-hand text-lg opacity-70">
-                    Pick how hard the task is and how important it is. This helps the app decide when to schedule it.
+             <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2 border-l-2 border-highlighter-blue/40 pl-3">
+                  <h4 className="font-marker text-base flex items-center gap-2 text-ink/60"><Target size={14}/> Parameters</h4>
+                  <p className="font-hand text-sm leading-relaxed opacity-60">
+                    Set your <strong>Skill Level</strong> (Mastery) and <strong>Priority</strong>. This isn't just metadata—the Smart Scheduler uses this to rank tasks.
                   </p>
                 </div>
-                <div className="space-y-3 border-l-4 border-highlighter-yellow pl-4">
-                  <h4 className="font-marker text-xl flex items-center gap-2"><Lightbulb size={18}/> AI Chunks</h4>
-                  <p className="font-hand text-lg opacity-70">
-                    Turn this on to have the AI split your one big task into smaller sub-tasks automatically.
+                <div className="space-y-2 border-l-2 border-highlighter-yellow/40 pl-3">
+                  <h4 className="font-marker text-base flex items-center gap-2 text-ink/60"><Lightbulb size={14}/> AI Chunks</h4>
+                  <p className="font-hand text-sm leading-relaxed opacity-60">
+                    Struggling to start? The <strong>Want Help?</strong> toggle uses AI to break your task into actionable sub-tasks.
                   </p>
                 </div>
              </div>
            </div>
 
-           <div className="sketch-border bg-[#fff9c4] p-10 transform rotate-1 shadow-xl">
-              <h3 className="font-marker text-3xl mb-6 flex items-center gap-3">
-                <TrendingUp size={28} /> Satisfaction Score
+           {/* David Burns Sticky Note */}
+           <div className="sketch-border bg-[#fff9c4] p-8 transform rotate-1 shadow-sm relative group hover:rotate-0 transition-transform cursor-default">
+              <div className="absolute top-2 right-2 opacity-5 group-hover:opacity-20 transition-opacity"><Quote size={40} /></div>
+              <h3 className="font-marker text-xl mb-3 flex items-center gap-2 text-ink/80">
+                <TrendingUp size={18} className="text-green-600" /> David Burns' Method
               </h3>
-              <p className="font-hand text-xl leading-relaxed">
-                Before starting, guess how good you'll feel once it's done (0-100%). After you finish, give a real rating. This helps you realize that working is usually less painful than you think.
-              </p>
-           </div>
-           
-           <div className="p-6 sketch-border border-dashed bg-white/50">
-              <h4 className="font-marker text-xl mb-4">Edit or Delete</h4>
-              <p className="font-hand text-lg opacity-80">
-                Click the <strong>Pencil</strong> icon on a task card to change details. Click the <strong>Trash</strong> icon to delete it.
+              <p className="font-hand text-base leading-relaxed text-ink/70">
+                Dr. David Burns, author of <em>Feeling Good</em>, suggests predicting your <strong>Satisfaction Level</strong> before you work. 
+                <br/><br/>
+                We often overestimate how painful a task will be. By predicting joy first, and recording the actual result later, you retrain your brain to stop procrastinating.
               </p>
            </div>
         </div>
       </section>
 
-      {/* ─── 2. CALENDAR ─── */}
-      <section className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
-        <div className="md:text-right sticky top-24">
-          <h2 className="marker-text text-4xl mb-4 flex md:justify-end items-center gap-3">
-             <Calendar className="text-highlighter-pink" size={32} />
-             Calendar
+      {/* ─── 2. THE BLUEPRINT ─── */}
+      <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
+        <div className="md:text-right sticky top-24 pt-2">
+          <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
+             <Calendar className="text-highlighter-pink" size={20} />
+             The Blueprint
           </h2>
-          <p className="font-hand text-xl text-ink/60">Planning your day.</p>
+          <p className="font-hand text-base text-ink/40">Visual Scheduling.</p>
         </div>
-        <div className="space-y-8">
-           <div className="sketch-border bg-white p-10">
-             <h3 className="font-marker text-3xl mb-6">The Timeline</h3>
-             <p className="font-hand text-xl mb-8">
-               The Calendar shows you at what time you should start each task.
-             </p>
+        
+        <div className="space-y-6">
+           <div className="sketch-border bg-white p-6">
+             <h3 className="font-marker text-lg mb-4">Scheduling your Flow</h3>
+             <p className="font-hand text-base mb-8 opacity-70">The calendar view is where your tasks meet the reality of time.</p>
              
-             <div className="space-y-12">
-                <div className="flex gap-8 items-start relative pb-8 border-b border-ink/5">
-                  <div className="bg-ink text-white p-4 font-marker text-xl rotate-3 shrink-0">AUTO</div>
+             <div className="space-y-10">
+                <div className="flex gap-6 items-start">
+                  <div className="bg-ink text-white px-3 py-1 font-marker text-sm rotate-1 shrink-0">AUTO</div>
                   <div>
-                    <h4 className="font-marker text-2xl mb-2">Smart Schedule</h4>
-                    <p className="font-hand text-xl opacity-80">Click the "Smart Schedule" button at the top. The app will automatically place all your tasks into empty time slots based on your work hours.</p>
+                    <h4 className="font-marker text-base mb-1">Smart Schedule</h4>
+                    <p className="font-hand text-sm opacity-60 leading-relaxed">Let the engine automatically place all your tasks based on priority, deadline, and your available <strong>WIN-DOWS</strong>.</p>
                   </div>
                 </div>
 
-                <div className="flex gap-8 items-start relative">
-                  <div className="bg-white border-4 border-ink p-4 font-marker text-xl -rotate-2 shrink-0">MANUAL</div>
+                <div className="flex gap-6 items-start">
+                  <div className="bg-white border-2 border-ink px-3 py-1 font-marker text-sm -rotate-1 shrink-0">MANUAL</div>
                   <div>
-                    <h4 className="font-marker text-2xl mb-2">Picking a Slot</h4>
-                    <p className="font-hand text-xl opacity-80">Click any hour on the calendar grid. A menu will open where you can pick a task to assign to that specific time.</p>
+                    <h4 className="font-marker text-base mb-1">Grid Booking</h4>
+                    <p className="font-hand text-sm opacity-60 leading-relaxed">Click any open hour on the timeline to manually "Seal the Slot." Use this for tasks that <em>must</em> happen at a specific time.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 pt-4">
+                  <div className="sketch-border p-4 bg-paper-bg/40 border-dashed border-ink/10 relative">
+                     <div className="absolute top-1 right-2 text-ink/10 rotate-12"><Moon size={12}/></div>
+                     <h5 className="font-marker text-sm mb-2 flex items-center gap-2 text-ink/60">Night Owl</h5>
+                     <p className="font-hand text-xs opacity-70">Sets your window to later hours (e.g., 2 PM to 2 AM). Use this if you do your best work when the sun is down.</p>
+                  </div>
+                  <div className="sketch-border p-4 bg-paper-bg/40 border-dashed border-ink/10 relative">
+                     <div className="absolute top-1 right-2 text-ink/10 -rotate-12"><Sun size={12}/></div>
+                     <h5 className="font-marker text-sm mb-2 flex items-center gap-2 text-ink/60">Early Bird</h5>
+                     <p className="font-hand text-xs opacity-70">Focuses your energy in the morning (e.g., 7 AM to 7 PM). Ideal for early risers who want to clear the deck by dinner.</p>
                   </div>
                 </div>
              </div>
@@ -154,42 +167,42 @@ const GuideView: React.FC = () => {
       </section>
 
       {/* ─── 3. WORKING ─── */}
-      <section className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
-        <div className="md:text-right sticky top-24">
-          <h2 className="marker-text text-4xl mb-4 flex md:justify-end items-center gap-3">
-             <Clock className="text-green-600" size={32} />
-             Progress
+      <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
+        <div className="md:text-right sticky top-24 pt-2">
+          <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
+             <Clock className="text-green-600" size={20} />
+             Execution
           </h2>
-          <p className="font-hand text-xl text-ink/60">Getting things done.</p>
+          <p className="font-hand text-base text-ink/40">Tracking progress.</p>
         </div>
-        <div className="space-y-12">
-           <div className="sketch-border bg-white p-10">
-             <h3 className="font-marker text-3xl mb-8">Tracking Work</h3>
-             <ul className="space-y-12">
-                <li className="flex gap-6">
-                   <div className="w-12 h-12 bg-ink text-white rounded-full flex items-center justify-center font-marker text-2xl shrink-0">1</div>
-                   <div className="space-y-3">
-                      <h4 className="font-marker text-2xl">Start/Stop Timer</h4>
-                      <p className="font-hand text-xl opacity-80 italic">
-                        Click <strong>Start</strong> on your task when you begin working. This tracks exactly how much time you are spending.
+        
+        <div className="space-y-6">
+           <div className="sketch-border bg-white p-6">
+             <ul className="space-y-8 font-hand text-base">
+                <li className="flex gap-5">
+                   <div className="w-8 h-8 sketch-border flex items-center justify-center font-marker text-sm shrink-0">01</div>
+                   <div>
+                      <h4 className="font-marker text-base">The Timer</h4>
+                      <p className="opacity-60 text-sm leading-relaxed">
+                        Every session is logged. Start the clock on a task to track <strong>Actual Time</strong> vs <strong>Estimated Time</strong>.
                       </p>
                    </div>
                 </li>
-                <li className="flex gap-6">
-                   <div className="w-12 h-12 bg-ink text-white rounded-full flex items-center justify-center font-marker text-2xl shrink-0">2</div>
-                   <div className="space-y-3">
-                      <h4 className="font-marker text-2xl">Sub-tasks</h4>
-                      <p className="font-hand text-xl opacity-80">
-                        Click a task to open the side panel. Here you can check off the smaller steps.
+                <li className="flex gap-5">
+                   <div className="w-8 h-8 sketch-border flex items-center justify-center font-marker text-sm shrink-0">02</div>
+                   <div>
+                      <h4 className="font-marker text-base">Sub-Tasks (Chunks)</h4>
+                      <p className="opacity-60 text-sm leading-relaxed">
+                        Click any task to expand the side panel. Deleting or completing these smaller steps updates your overall progress in real-time.
                       </p>
                    </div>
                 </li>
-                <li className="flex gap-6">
-                   <div className="w-12 h-12 bg-ink text-white rounded-full flex items-center justify-center font-marker text-2xl shrink-0">3</div>
-                   <div className="space-y-3">
-                      <h4 className="font-marker text-2xl">The Archive</h4>
-                      <p className="font-hand text-xl opacity-80">
-                        When a task is 100% finished, it moves to the <strong>Archive</strong> tab in the sidebar. You can see everything you've completed there.
+                <li className="flex gap-5">
+                   <div className="w-8 h-8 sketch-border flex items-center justify-center font-marker text-sm shrink-0">03</div>
+                   <div>
+                      <h4 className="font-marker text-base flex items-center gap-2">The Vault <Archive size={14}/></h4>
+                      <p className="opacity-60 text-sm leading-relaxed">
+                        When a task is complete, it is archived in <strong>The Vault</strong>. You can search or export your history from there anytime.
                       </p>
                    </div>
                 </li>
@@ -197,8 +210,34 @@ const GuideView: React.FC = () => {
            </div>
         </div>
       </section>
+
+      {/* ─── Closing Quote ─── */}
+      <footer className="mt-20 pt-16 border-t-4 border-double border-ink/20 text-center max-w-2xl mx-auto space-y-8 relative">
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-ink/5"><Quote size={80} /></div>
+        
+        <p className="font-hand text-2xl leading-relaxed text-ink/80 italic relative z-10">
+          "The greatest source of fatigue is not the work itself, but the <strong>emotional weight</strong> of the tasks we leave unfinished."
+        </p>
+        
+        <div className="flex flex-col items-center gap-2 opacity-50 relative z-10">
+          <div className="w-12 h-[2px] bg-ink" />
+          <p className="font-marker text-sm tracking-widest uppercase">Take the first step.</p>
+        </div>
+        
+        <div className="pt-12 flex justify-center gap-6 opacity-10">
+           <Pencil size={20} /><SparklesIcon size={20} /><CheckCircle2 size={20} /><MousePointer2 size={20} />
+        </div>
+      </footer>
     </div>
   );
 };
+
+/* Internal simple Sparkles placeholder icon */
+const SparklesIcon = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3-1.912 5.813L4.275 10.725 10.088 12.637 12 18.45l1.912-5.813L19.725 13.275 13.912 11.363Z"/>
+    <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
+  </svg>
+);
 
 export default GuideView;
