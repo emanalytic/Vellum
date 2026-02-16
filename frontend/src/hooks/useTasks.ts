@@ -143,7 +143,6 @@ export const useTasks = (session: Session | null) => {
         const taskToUpdate = tasksRef.current.find(t => t.id === id);
         if (taskToUpdate) {
           const finalTask = { ...taskToUpdate, ...updates };
-          // Sanitize: 'instances' is a read-only view from backend, not part of UpsertDto
           const { instances, ...cleanTask } = finalTask as any; 
           await api.upsertTask(cleanTask);
         }
@@ -248,7 +247,10 @@ export const useTasks = (session: Session | null) => {
   const handleSaveLog = useCallback(async (taskId: string, log: TaskHistory) => {
     if (!session) return;
     try {
-      await api.createProgressLog(taskId, log);
+      // Sanitize: 'date' is used locally but not in LogProgressDto
+      const { date, ...cleanLog } = log as any;
+      await api.createProgressLog(taskId, cleanLog);
+      
       setTasks(prev => prev.map(t => {
         if (t.id === taskId) {
           return {
