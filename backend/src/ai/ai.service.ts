@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import { ClassifyTaskDto } from './dto/classify-task.dto';
@@ -98,8 +98,9 @@ Constraints:
       return rawData as TaskClassificationDto;
     } catch (error: any) {
       if (error.message === 'DAILY_LIMIT_REACHED') {
-        throw new InternalServerErrorException(
+        throw new HttpException(
           'Daily AI limit reached (3 tasks per day). Try again tomorrow!',
+          HttpStatus.TOO_MANY_REQUESTS,
         );
       }
       console.error('AI Classification Error:', error.message);
