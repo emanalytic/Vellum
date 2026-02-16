@@ -1,7 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { TasksService } from '../tasks/tasks.service';
 import { ScheduleDto } from './dto/schedule.dto';
-import { Task, TaskInstance, UserPreferences } from '../tasks/types';
 
 interface TimeSlot {
   start: number;
@@ -50,7 +49,9 @@ export class SchedulerService {
       return dA - dB;
     });
 
-    const existingSlots = this.buildTimeSlots(tasks.flatMap(t => t.instances || []));
+    const existingSlots = this.buildTimeSlots(
+      tasks.flatMap(t => (t.instances || []).filter((i: any) => i.status === 'scheduled'))
+    );
     const peakHours = this.buildPeakHoursMap(tasks, clientTz);
 
     const { scheduled, unschedulableTasks } = this.fastSchedule(

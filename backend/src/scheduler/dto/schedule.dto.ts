@@ -14,9 +14,9 @@ export class ScheduleDto {
 
   @IsNumber()
   @Min(1)
-  @Max(90)
+  @Max(14)
   @IsOptional()
-  daysToSchedule?: number = 30;
+  daysToSchedule?: number = 3;
 
   @IsString()
   @IsOptional()
