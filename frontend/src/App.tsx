@@ -32,8 +32,10 @@ import { useToast } from "./context/ToastContext";
 import { useTasks } from "./hooks/useTasks";
 import JournalView from "./views/JournalView";
 import GuideView from "./views/GuideView";
+import { useSound } from "./hooks/useSound";
 
 function App() {
+  const { playClick, playTabs, playPop } = useSound();
   const { showToast } = useToast();
   const [session, setSession] = useState<Session | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -344,38 +346,38 @@ function App() {
         <nav className="flex flex-col md:flex-row items-center justify-between px-4 md:px-12 py-6 border-b-2 border-ink border-dashed bg-white/30 gap-6">
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
             <button
-              onClick={() => setActiveTab("journal")}
+              onClick={() => { playTabs(); setActiveTab("journal"); }}
               className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "journal" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
             >
               <LayoutDashboard size={20} /> Canvas
             </button>
             <button
-              onClick={() => setActiveTab("calendar")}
+              onClick={() => { playTabs(); setActiveTab("calendar"); }}
               className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "calendar" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
             >
               <Calendar size={20} /> Timeline
             </button>
             <button
-              onClick={() => setActiveTab("analysis")}
+              onClick={() => { playTabs(); setActiveTab("analysis"); }}
               className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "analysis" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
             >
               <Activity size={20} /> Insights
             </button>
             <button
-              onClick={() => setActiveTab("archive")}
+              onClick={() => { playTabs(); setActiveTab("archive"); }}
               className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "archive" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
             >
               <Archive size={20} /> Vault
             </button>
             <button
-              onClick={() => setActiveTab("guide")}
+              onClick={() => { playTabs(); setActiveTab("guide"); }}
               className={`flex items-center gap-2 font-hand text-xl md:text-2xl transition-all ${activeTab === "guide" ? "text-ink scale-110 underline decoration-wavy decoration-highlighter-yellow underline-offset-4" : "opacity-50 hover:opacity-100"}`}
             >
               <Sparkles size={20} /> Guide
             </button>
           </div>
           <button
-            onClick={handleSmartSchedule}
+            onClick={() => { playClick(); handleSmartSchedule(); }}
             disabled={isScheduling}
             className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2 sketch-border bg-ink text-white font-marker text-xl hover:bg-highlighter-yellow hover:text-ink transition-all ${isScheduling ? "animate-pulse" : ""}`}
           >
@@ -402,9 +404,10 @@ function App() {
                       <div className="tape-effect bg-white sketch-border px-4 py-2 rotate-1 text-right flex flex-col items-end">
                         <span className="font-hand text-lg">Current Vibe</span>
                         <button
-                          onClick={() =>
-                            setMoodIndex((prev) => (prev + 1) % moods.length)
-                          }
+                          onClick={() => {
+                            playClick();
+                            setMoodIndex((prev) => (prev + 1) % moods.length);
+                          }}
                           className="flex items-center gap-2 mt-1 hover:scale-110 transition-transform"
                         >
                           {moods[moodIndex].icon}
@@ -482,7 +485,7 @@ function App() {
           <div className="max-w-2xl w-full">
             <div className="sketch-border p-8 bg-white transform -rotate-1 relative shadow-2xl">
               <button
-                onClick={() => setEditingTaskId(null)}
+                onClick={() => { playPop(); setEditingTaskId(null); }}
                 className="absolute -top-4 -right-4 bg-ink text-white p-2 sketch-border hover:bg-highlighter-pink hover:text-ink transition-all"
               >
                 <ChevronRight className="rotate-180" size={24} />
@@ -547,9 +550,10 @@ function App() {
                     {(["low", "medium", "high"] as TaskPriority[]).map((p) => (
                       <button
                         key={p}
-                        onClick={() =>
-                          updateTask(editingTask.id, { priority: p })
-                        }
+                        onClick={() => {
+                          playClick();
+                          updateTask(editingTask.id, { priority: p });
+                        }}
                         className={`px-4 py-1 sketch-border font-hand text-lg capitalize transition-all ${editingTask.priority === p ? "bg-highlighter-yellow scale-110 shadow-lg" : "bg-white opacity-40"}`}
                       >
                         {p}
@@ -557,7 +561,7 @@ function App() {
                     ))}
                   </div>
                   <button
-                    onClick={() => setEditingTaskId(null)}
+                    onClick={() => { playClick(); setEditingTaskId(null); }}
                     className="px-6 py-2 md:px-10 md:py-3 sketch-border bg-ink text-white font-marker text-xl md:text-2xl hover:bg-highlighter-yellow hover:text-ink transition-all shadow-[4px_4px_0_rgba(0,0,0,0.5)]"
                   >
                     Save  
@@ -568,6 +572,7 @@ function App() {
                   <div className="pt-4 border-t-2 border-dashed border-ink/10 flex justify-end">
                     <button
                       onClick={() => {
+                        playClick();
                         updateTask(editingTask.id, {
                           scheduledStart: undefined,
                           scheduledEnd: undefined,

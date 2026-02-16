@@ -33,7 +33,7 @@ const JournalView: React.FC<JournalViewProps> = ({
   isClassifying,
   onTabChange,
 }) => {
-  const { playPop, playClick, playSuccess } = useSound();
+  const { playPop, playClick, playSuccess, playTabs } = useSound();
   const [showAddForm, setShowAddForm] = useState(false);
   const [deck, setDeck] = useState({
     description: "",
@@ -102,12 +102,13 @@ const JournalView: React.FC<JournalViewProps> = ({
                     </label>
                     <select
                       value={deck.skillLevel}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        playClick();
                         setDeck({
                           ...deck,
                           skillLevel: e.target.value,
-                        })
-                      }
+                        });
+                      }}
                       className="font-hand text-xl p-2 border-b-2 border-ink focus:outline-none bg-transparent appearance-none cursor-pointer"
                     >
                       <option value="total_novice">Total Novice</option>
@@ -187,12 +188,13 @@ const JournalView: React.FC<JournalViewProps> = ({
                       max="100"
                       step="5"
                       value={deck.predictedSatisfaction}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        playClick();
                         setDeck({
                           ...deck,
                           predictedSatisfaction: parseInt(e.target.value),
-                        })
-                      }
+                        });
+                      }}
                       className="w-full accent-highlighter-pink cursor-pointer"
                     />
                     <span className="font-hand text-sm opacity-50">Joy!</span>
@@ -327,8 +329,8 @@ const JournalView: React.FC<JournalViewProps> = ({
             </p>
             {onTabChange && (
               <button 
-                onClick={() => onTabChange("guide")}
-                className="mt-8 font-hand text-lg text-ink/40 hover:text-highlighter-pink hover:underline underline-offset-4 transition-colors"
+                onClick={() => { playTabs(); onTabChange("guide"); }}
+                className="mt-8 font-hand text-lg text-ink/40 hover:text-highlighter-pink hover:underline underline-offset-4 transition-colors pointer-events-auto"
               >
                 (confused? read the manual)
               </button>

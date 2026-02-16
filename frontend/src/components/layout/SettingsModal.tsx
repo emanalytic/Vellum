@@ -1,6 +1,7 @@
 import React from "react";
 import { X, Smile, Volume2 } from "lucide-react";
 import type { UserPreferences } from "../../types";
+import { useSound } from "../../hooks/useSound";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   preferences,
   onUpdatePreferences,
 }) => {
+  const { playClick, playPop } = useSound();
   const [isEditing, setIsEditing] = React.useState(false);
   const [name, setName] = React.useState(user.name);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -47,7 +49,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-8 bg-highlighter-blue/30 rotate-1 shadow-sm pointer-events-none" />
 
         <button
-          onClick={onClose}
+          onClick={() => { playPop(); onClose(); }}
           className="absolute top-4 right-4 p-2 hover:bg-black/5 rounded-full transition-colors z-10"
         >
           <X size={24} />
@@ -66,7 +68,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               </h3>
               {!isEditing && (
                 <button 
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => { playClick(); setIsEditing(true); }}
                   className="text-xs font-sans uppercase tracking-widest hover:bg-black/5 px-2 py-1 rounded transition-colors"
                 >
                   Edit
@@ -87,14 +89,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <div className="flex justify-end gap-2 pt-2">
                    <button 
-                      onClick={() => setIsEditing(false)}
+                      onClick={() => { playClick(); setIsEditing(false); }}
                       className="px-3 py-1 font-hand text-sm hover:underline opacity-60"
                       disabled={isLoading}
                    >
                      Cancel
                    </button>
                    <button 
-                      onClick={handleSaveProfile}
+                      onClick={() => { playClick(); handleSaveProfile(); }}
                       disabled={isLoading}
                       className="px-4 py-1 bg-ink text-white font-hand rounded hover:bg-highlighter-pink hover:text-ink transition-colors disabled:opacity-50"
                    >
@@ -132,13 +134,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                </div>
                
                <button 
-                  onClick={() => onUpdatePreferences({
-                    ...preferences,
-                    soundEnabled: !preferences.soundEnabled
-                  })}
-                  className={`w-12 h-6 rounded-full relative transition-colors duration-300 border-2 border-ink ${preferences.soundEnabled ? 'bg-highlighter-pink' : 'bg-paper-bg'}`}
+                  onClick={() => {
+                    playClick();
+                    onUpdatePreferences({
+                      ...preferences,
+                      soundEnabled: !preferences.soundEnabled
+                    });
+                  }}
+                  className={`w-10 h-5 rounded-full relative transition-colors duration-300 border-2 border-ink ${preferences.soundEnabled ? 'bg-highlighter-pink' : 'bg-paper-bg'}`}
                >
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white border border-ink transition-all duration-300 shadow-sm ${preferences.soundEnabled ? 'left-6' : 'left-0.5'}`} />
+                  <div className={`absolute top-0.5 w-3 h-3 bg-white border border-ink rounded-full transition-all duration-300 shadow-sm ${preferences.soundEnabled ? 'left-5' : 'left-0.5'}`} />
                </button>
             </div>
           </div>

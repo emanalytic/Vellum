@@ -110,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, activeTab, onTabChange, isOpen,
               <span> Settings</span>
             </button>
             <button 
-              onClick={onLogout}
+              onClick={() => { playPop(); onLogout(); }}
               className="flex items-center gap-3 w-full text-left p-3 font-marker text-xl bg-ink text-white hover:bg-highlighter-pink hover:text-ink transition-all sketch-border"
             >
               <LogOut size={20} />
