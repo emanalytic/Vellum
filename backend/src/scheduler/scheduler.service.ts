@@ -53,6 +53,9 @@ export class SchedulerService {
     const existingSlots = this.buildTimeSlots(tasks.flatMap(t => t.instances || []));
     const peakHours = this.buildPeakHoursMap(tasks);
     
+    // Track actual failures
+    let actualFailures = 0;
+
     const scheduled = this.fastSchedule(
       activeTasks,
       existingSlots,
@@ -61,18 +64,14 @@ export class SchedulerService {
       clientTz,
       now,
       daysToSchedule,
-    );
-
-    const totalRequested = activeTasks.reduce(
-      (sum, t) => sum + (t.targetSessionsPerDay || 1) * daysToSchedule,
-      0,
+      (count) => { actualFailures += count; }
     );
 
     await this.tasksService.bulkInsertInstances(token, userId, scheduled);
 
     return {
       scheduledCount: scheduled.length,
-      unschedulableCount: Math.max(0, totalRequested - scheduled.length),
+      unschedulableCount: actualFailures,
       schedule: scheduled,
     };
   }
@@ -105,6 +104,7 @@ export class SchedulerService {
     tz: string,
     now: number,
     days: number,
+    onFail: (count: number) => void,
   ): any[] {
     const scheduled: any[] = [];
     const occupiedSlots: TimeSlot[] = [...existingSlots];
@@ -132,40 +132,49 @@ export class SchedulerService {
         const existingToday = taskTimes.filter(t => t >= dayStart && t < dayEnd).length;
         let placedToday = existingToday;
 
-        const candidates = this.generateScoredCandidates(
-          window.start,
-          window.end,
-          scoreMap,
-          tz,
-          now,
-        );
+        if (placedToday < repsPerDay) {
+          const sessionsNeededThisDay = repsPerDay - placedToday;
+          let sessionsActuallyPlaced = 0;
 
-        for (const { time, score } of candidates) {
-          if (placedToday >= repsPerDay) break;
+          const candidates = this.generateScoredCandidates(
+            window.start,
+            window.end,
+            scoreMap,
+            tz,
+            now,
+          );
 
-          const slotEnd = time + duration;
-          if (slotEnd > window.end) continue;
+          for (const { time, score } of candidates) {
+            if (placedToday >= repsPerDay) break;
 
-          // Deadline Constraint
-          if (task.deadline) {
-            const deadlineDate = new Date(task.deadline).getTime();
-            if (slotEnd > deadlineDate) continue;
+            const slotEnd = time + duration;
+            if (slotEnd > window.end) continue;
+
+            if (task.deadline) {
+              const deadlineDate = new Date(task.deadline).getTime();
+              if (slotEnd > deadlineDate) continue;
+            }
+
+            if (this.hasCollision(time, slotEnd, occupiedSlots)) continue;
+            if (this.violatesSpacing(time, taskTimes, minSpacing)) continue;
+
+            const slot = { start: time, end: slotEnd, taskId: task.id };
+            occupiedSlots.push(slot);
+            taskTimes.push(time);
+            
+            scheduled.push({
+              taskId: task.id,
+              start: new Date(time).toISOString(),
+              end: new Date(slotEnd).toISOString(),
+            });
+
+            placedToday++;
+            sessionsActuallyPlaced++;
           }
 
-          if (this.hasCollision(time, slotEnd, occupiedSlots)) continue;
-          if (this.violatesSpacing(time, taskTimes, minSpacing)) continue;
-
-          const slot = { start: time, end: slotEnd, taskId: task.id };
-          occupiedSlots.push(slot);
-          taskTimes.push(time);
-          
-          scheduled.push({
-            taskId: task.id,
-            start: new Date(time).toISOString(),
-            end: new Date(slotEnd).toISOString(),
-          });
-
-          placedToday++;
+          if (sessionsActuallyPlaced < sessionsNeededThisDay) {
+            onFail(sessionsNeededThisDay - sessionsActuallyPlaced);
+          }
         }
 
         taskSlots.set(task.id, taskTimes);

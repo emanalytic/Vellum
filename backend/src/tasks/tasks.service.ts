@@ -118,6 +118,10 @@ async findAll(token: string, userId: string) {
       }
     }
 
+    if (dto.status === 'completed') {
+      await this.clearFutureScheduledInstances(token, userId, taskData.id);
+    }
+
     return taskData;
   }
 
@@ -235,14 +239,20 @@ async findAll(token: string, userId: string) {
     }
   }
 
-  async clearFutureScheduledInstances(token: string, userId: string) {
+  async clearFutureScheduledInstances(token: string, userId: string, taskId?: string) {
     const now = new Date().toISOString();
-    const { error } = await this.getClient(token)
+    let query = this.getClient(token)
       .from('task_instances')
       .delete()
       .eq('user_id', userId)
       .eq('status', 'scheduled')
       .gte('start_time', now);
+
+    if (taskId) {
+      query = query.eq('task_id', taskId);
+    }
+
+    const { error } = await query;
 
     if (error) {
       console.error('Clear instances error:', error.message);
