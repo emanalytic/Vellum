@@ -246,9 +246,7 @@ export const useTasks = (session: Session | null) => {
 
   const handleSaveLog = useCallback(async (taskId: string, log: TaskHistory) => {
     if (!session) return;
-    try {
-      // Sanitize: 'date' is used locally but not in LogProgressDto
-      const { date, ...cleanLog } = log as any;
+    try {      const { date, ...cleanLog } = log as any;
       await api.createProgressLog(taskId, cleanLog);
       
       setTasks(prev => prev.map(t => {
@@ -260,10 +258,11 @@ export const useTasks = (session: Session | null) => {
         }
         return t;
       }));
-    } catch (e) {
+    } catch (e: any) {
       console.error("Log save error:", e);
+      showToast("Failed to save progress log.", "error");
     }
-  }, [session]);
+  }, [session, showToast]);
 
   const handleSmartSchedule = useCallback(async () => {
     if (!session) return;

@@ -40,9 +40,14 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({ tasks }) => {
         return;
 
       const startDate = new Date(log.startTime);
+      if (isNaN(startDate.getTime())) return;
+
       const startHour = startDate.getHours();
       const startMinute = startDate.getMinutes();
-      const totalMins = Math.ceil(log.durationSeconds / 60);
+      
+      // Safety check for reasonable duration (e.g. < 24 hours) to prevent infinite loops
+      const durationMins = Math.ceil(log.durationSeconds / 60);
+      const totalMins = Math.min(durationMins, 24 * 60); 
 
       // Distribute focus time across hours the session spanned
       let remaining = totalMins;
@@ -113,9 +118,14 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({ tasks }) => {
     // Convert to array sorted by date
     const entries = Array.from(dateMap.entries()).map(([date, count]) => ({
       date,
+      // Helper for sorting
+      timestamp: new Date(date).getTime(),
       completed: count,
       cumulative: 0, // will be filled below
     }));
+
+    // Sort chronologically
+    entries.sort((a, b) => a.timestamp - b.timestamp);
 
     // Add cumulative count
     let cumCount = 0;
@@ -129,8 +139,21 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({ tasks }) => {
 
   // CHART 3: SATISFACTION (David Burns)
   const satisfactionData = useMemo(() => {
+    // Helper to get completion time
+    const getCompletionTime = (t: Task) => {
+      if (t.history && t.history.length > 0) {
+        const last = t.history[t.history.length - 1];
+        return new Date(last.endTime || last.date).getTime();
+      }
+      // Fallback to updated_at if available, or 0
+      return 0;
+    };
+
     return tasks
-      .filter((t) => t.status === "completed" && t.actualSatisfaction !== undefined)
+      .filter(
+        (t) => t.status === "completed" && t.actualSatisfaction !== undefined,
+      )
+      .sort((a, b) => getCompletionTime(b) - getCompletionTime(a)) // Newest first
       .slice(0, 10) // Show last 10 completed tasks
       .map((t) => ({
         name: t.description,
