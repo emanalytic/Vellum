@@ -25,7 +25,7 @@ export class AiService {
     userId: string,
   ): Promise<TaskClassificationDto> {
     try {
-      // 1. Check Daily Limit
+      // check Daily Limit
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -97,7 +97,7 @@ Constraints:
     } catch (error: any) {
       if (error.message === 'DAILY_LIMIT_REACHED') {
         throw new InternalServerErrorException(
-          'Daily AI limit reached (5 tasks per day). Try again tomorrow!',
+          'Daily AI limit reached (3 tasks per day). Try again tomorrow!',
         );
       }
       console.error('AI Classification Error:', error.message);
