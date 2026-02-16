@@ -135,7 +135,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 
   const scheduledInstances = useMemo(() => {
     return allScheduledInstances.filter(inst => 
-      new Date(inst.start).toDateString() === currentDate.toDateString()
+      new Date(inst.start).toDateString() === currentDate.toDateString() &&
+      inst.instStatus !== 'completed'
     );
   }, [allScheduledInstances, currentDate]);
 
