@@ -67,8 +67,19 @@ export const useTasks = (session: Session | null) => {
     setIsClassifying(true);
     try {
       let chunks: TaskChunk[] = [];
+      let aiLimitReached = false;
+
       if (deck.wantsChunks) {
-        chunks = await fetchChunks(deck.description, deck.skillLevel);
+        try {
+          chunks = await fetchChunks(deck.description, deck.skillLevel);
+        } catch (e: any) {
+          if (e.message?.includes("Daily AI limit reached")) {
+            aiLimitReached = true;
+            showToast(e.message, "info");
+          } else {
+            throw e; // Re-throw other errors
+          }
+        }
       }
 
       const newTask: Task = {
@@ -88,12 +99,16 @@ export const useTasks = (session: Session | null) => {
 
       await api.upsertTask(newTask);
       setTasks(prev => [newTask, ...prev]);
-      showToast("Task scribbled down!", "success");
+      
+      if (aiLimitReached) {
+        showToast("Task saved! (But couldn't add AI chunks today).", "success");
+      } else {
+        showToast("Task scribbled down!", "success");
+      }
       return newTask;
-    } catch (e) {
-      const error = e as Error;
-      console.error("Error adding task:", error);
-      showToast("Failed to save task: " + (error.message || "Something went wrong."), "error");
+    } catch (e: any) {
+      console.error("Error adding task:", e);
+      showToast("Failed to save task: " + (e.message || "Something went wrong."), "error");
     } finally {
       setIsClassifying(false);
     }
