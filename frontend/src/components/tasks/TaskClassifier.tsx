@@ -30,9 +30,12 @@ const TaskClassifier: React.FC = () => {
     try {
       const data = await api.classifyTask(description, 'intermediate');
       setResult(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Classification error:', error);
-      showToast('Failed to classify task. Please try again.', 'error');
+      const message = error.message.includes('Daily AI limit') 
+        ? error.message 
+        : 'Failed to classify task. Please try again.';
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }

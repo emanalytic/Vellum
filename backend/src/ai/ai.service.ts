@@ -3,21 +3,44 @@ import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import { ClassifyTaskDto } from './dto/classify-task.dto';
 import { TaskClassificationDto } from './dto/task-classification.dto';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class AiService {
   private groq: Groq;
 
-  constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GROQ_API_KEY');
+  constructor(
+    private configService: ConfigService,
+    private supabaseService: SupabaseService,
+  ) {
+    const apiKey = this.configService.get<string>('API_KEY');
     if (!apiKey) {
-      console.warn('GROQ_API_KEY is not set. AI features will fail.');
+      console.warn('API_KEY is not set. AI features will fail.');
     }
     this.groq = new Groq({ apiKey });
   }
 
-  async classifyTask(dto: ClassifyTaskDto): Promise<TaskClassificationDto> {
+  async classifyTask(
+    dto: ClassifyTaskDto,
+    userId: string,
+  ): Promise<TaskClassificationDto> {
     try {
+      // 1. Check Daily Limit
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { count, error: countError } = await this.supabaseService.client
+        .from('ai_usage')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .gte('created_at', today.toISOString());
+
+      if (countError) {
+        console.error('Error checking AI limit:', countError.message);
+      } else if (count !== null && count >= 3) {
+        throw new Error('DAILY_LIMIT_REACHED');
+      }
+
       const { task_description, skill_level } = dto;
 
       const systemPrompt = `You are a task time-behavior classifier.
@@ -26,14 +49,9 @@ Output: Strict JSON matching the schema below. No chatter.
 
 Schema:
 {
-  "workload_type": "linear_reading" | "problem_solving" | "recall_memorization" | "production_writing" | "procedural_execution" | "exploratory_learning",
-  "intensity": "light" | "medium" | "heavy",
-  "baseline_duration_min": integer (1-480),
-  "variance_profile": "low" | "moderate" | "high",
   "suggested_chunks": [
     { "title": "string", "description": "string", "estimated_duration_min": integer }
-  ],
-  "confidence": number (0-1)
+  ]
 }
 
 Scale calibration for skill_level '${skill_level}':
@@ -42,8 +60,7 @@ Scale calibration for skill_level '${skill_level}':
 - advanced/master/expert: Multiply generic durations by 0.7x. Chunks can be broader.
 
 Constraints:
-- suggested_chunks: Min 1, Max 5.
-- confidence: Reflect how ambiguous the task is.`;
+- suggested_chunks: Min 1, Max 5.`;
 
       const response = await this.groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
@@ -71,17 +88,18 @@ Constraints:
         rawData.suggested_chunks = rawData.suggested_chunks.slice(0, 5);
       }
 
-      rawData.baseline_duration_min = Math.max(
-        1,
-        Number(rawData.baseline_duration_min) || 15,
-      );
-      rawData.confidence = Math.min(
-        1,
-        Math.max(0, Number(rawData.confidence) || 0.5),
-      );
+      // 2. Record Usage
+      await this.supabaseService.client.from('ai_usage').insert({
+        user_id: userId,
+      });
 
       return rawData as TaskClassificationDto;
     } catch (error: any) {
+      if (error.message === 'DAILY_LIMIT_REACHED') {
+        throw new InternalServerErrorException(
+          'Daily AI limit reached (5 tasks per day). Try again tomorrow!',
+        );
+      }
       console.error('AI Classification Error:', error.message);
       throw new InternalServerErrorException(
         'AI classification service is temporarily unavailable. Please try again.',
