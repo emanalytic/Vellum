@@ -72,6 +72,7 @@ function App() {
       Sunday: ["10:00", "12:00"],
     },
     autoSchedule: false,
+    soundEnabled: true,
   });
   const [moodIndex, setMoodIndex] = useState(0);
   const moods = [
@@ -239,7 +240,10 @@ function App() {
   const initPreferences = async () => {
     try {
       const dbPrefs = await api.getPreferences();
-      if (dbPrefs) setPreferences(dbPrefs);
+      if (dbPrefs) {
+        setPreferences(dbPrefs);
+        localStorage.setItem('vellum_sound_enabled', String(dbPrefs.soundEnabled ?? true));
+      }
     } catch (e) {
       console.error("Error loading preferences:", e);
     }
@@ -269,6 +273,7 @@ function App() {
   const handlePreferenceChange = async (newPrefs: UserPreferences) => {
     if (!session) return;
     setPreferences(newPrefs);
+    localStorage.setItem('vellum_sound_enabled', String(newPrefs.soundEnabled));
     try {
       await api.updatePreferences(newPrefs);
     } catch (e) {
@@ -329,6 +334,8 @@ function App() {
           avatar: (session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture) as string,
         }}
         onUpdateProfile={handleUpdateProfile}
+        preferences={preferences}
+        onUpdatePreferences={handlePreferenceChange}
       />
 
       <div

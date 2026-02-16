@@ -8,4 +8,8 @@ export class PreferencesDto {
   @IsObject()
   @IsOptional()
   availableHours?: Record<string, any>;
+
+  @IsBoolean()
+  @IsOptional()
+  soundEnabled?: boolean;
 }

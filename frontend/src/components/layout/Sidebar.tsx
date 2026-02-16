@@ -1,6 +1,7 @@
 import React from 'react';
 import { LogOut, LayoutDashboard, Settings, ChevronLeft, Smile, Calendar, BarChart3, Archive } from 'lucide-react';
 import Logo from '../common/Logo';
+import { useSound } from '../../hooks/useSound';
 
 interface SidebarProps {
   user: {
@@ -17,6 +18,14 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ user, activeTab, onTabChange, isOpen, onToggle, onLogout, onSettings }) => {
+  const { playTabs, playPop, playClick } = useSound();
+
+  const handleTabChange = (tab: 'journal' | 'calendar' | 'analysis' | 'archive') => {
+    playTabs();
+    onTabChange(tab);
+    if (window.innerWidth < 1024) onToggle();
+  };
+
   return (
     <>
       {/* Backdrop for mobile */}
@@ -34,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, activeTab, onTabChange, isOpen,
 
         <div className="flex flex-col h-full p-6 sm:p-8 relative">
           <button 
-            onClick={onToggle}
+            onClick={() => { playClick(); onToggle(); }}
             className="absolute -right-12 top-6 sketch-border bg-white p-2 hover:bg-highlighter-yellow transition-colors"
           >
             <ChevronLeft size={24} className={isOpen ? '' : 'rotate-180'} />
@@ -63,28 +72,28 @@ const Sidebar: React.FC<SidebarProps> = ({ user, activeTab, onTabChange, isOpen,
 
           <nav className="space-y-2 pt-6 font-hand text-lg">
             <button 
-              onClick={() => { onTabChange('journal'); if (window.innerWidth < 1024) onToggle(); }}
+              onClick={() => handleTabChange('journal')}
               className={`flex items-center gap-3 w-full text-left p-2 rounded transition-colors group ${activeTab === 'journal' ? 'bg-highlighter-yellow/30 font-bold underline px-3' : 'hover:bg-highlighter-yellow/20'}`}
             >
               <LayoutDashboard size={20} className="group-hover:rotate-6 transition-transform" />
               <span>Tasks</span>
             </button>
             <button 
-              onClick={() => { onTabChange('calendar'); if (window.innerWidth < 1024) onToggle(); }}
+              onClick={() => handleTabChange('calendar')}
               className={`flex items-center gap-3 w-full text-left p-2 rounded transition-colors group ${activeTab === 'calendar' ? 'bg-highlighter-yellow/30 font-bold underline px-3' : 'hover:bg-highlighter-yellow/20'}`}
             >
               <Calendar size={20} className="group-hover:-rotate-6 transition-transform" />
               <span>Calendar</span>
             </button>
             <button 
-              onClick={() => { onTabChange('analysis'); if (window.innerWidth < 1024) onToggle(); }}
+              onClick={() => handleTabChange('analysis')}
               className={`flex items-center gap-3 w-full text-left p-2 rounded transition-colors group ${activeTab === 'analysis' ? 'bg-highlighter-yellow/30 font-bold underline px-3' : 'hover:bg-highlighter-yellow/20'}`}
             >
               <BarChart3 size={20} className="group-hover:scale-110 transition-transform" />
               <span>Analytics</span>
             </button>
              <button 
-              onClick={() => { onTabChange('archive'); if (window.innerWidth < 1024) onToggle(); }}
+              onClick={() => handleTabChange('archive')}
               className={`flex items-center gap-3 w-full text-left p-2 rounded transition-colors group ${activeTab === 'archive' ? 'bg-highlighter-yellow/30 font-bold underline px-3' : 'hover:bg-highlighter-yellow/20'}`}
             >
               <Archive size={20} className="group-hover:animate-bounce transition-transform" />
@@ -94,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, activeTab, onTabChange, isOpen,
 
           <div className="mt-auto space-y-4 pt-8 border-t border-ink/5">
             <button 
-              onClick={() => { onSettings(); if (window.innerWidth < 1024) onToggle(); }}
+              onClick={() => { playPop(); onSettings(); if (window.innerWidth < 1024) onToggle(); }}
               className="flex items-center gap-3 w-full text-left p-2 font-hand text-lg hover:bg-paper-bg transition-colors opacity-60 hover:opacity-100"
             >
               <Settings size={20} />

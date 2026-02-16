@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Play, Pause, Square, BarChart3, Trash2, ListTree, AlertCircle, Circle, Edit2, Check, X } from 'lucide-react';
 import type { Task, TaskHistory, TaskPriority } from '../../types';
+import { useSound } from '../../hooks/useSound';
 
 interface TaskCardProps {
   task: Task;
@@ -12,6 +13,7 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExploreChunks, onClick }) => {
+  const { playClick, playDelete, playTimer, playPop, playSuccess } = useSound();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -56,11 +58,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExplore
                   onChange={e => setEditValue(e.target.value)}
                   className="w-full font-marker text-xl border-b border-ink focus:outline-none bg-paper-bg/50 px-1"
                 />
-                <button onClick={handleEdit} className="text-green-600"><Check size={20}/></button>
-                <button onClick={() => setIsEditing(false)} className="text-red-600"><X size={20}/></button>
+                <button onClick={() => { playClick(); handleEdit(); }} className="text-green-600"><Check size={20}/></button>
+                <button onClick={() => { playClick(); setIsEditing(false); }} className="text-red-600"><X size={20}/></button>
              </div>
           ) : (
-            <div className="flex items-center gap-2 group/title cursor-pointer" onClick={() => setIsEditing(true)}>
+            <div className="flex items-center gap-2 group/title cursor-pointer" onClick={() => { playClick(); setIsEditing(true); }}>
               {priorityMarkers[task.priority]}
               <h3 className="marker-text text-xl leading-tight inline-block border-b-2 border-transparent group-hover/title:border-highlighter-yellow transition-all">{task.description}</h3>
               <Edit2 size={12} className="opacity-0 group-hover/title:opacity-30 ml-auto" />
@@ -76,7 +78,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExplore
             <ListTree size={16} />
           </button>
           <button 
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
+            onClick={(e) => { e.stopPropagation(); playDelete(); onDelete(task.id); }}
             className="text-ink-light hover:text-highlighter-pink p-1 transition-colors"
           >
             <Trash2 size={14} />
@@ -116,14 +118,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExplore
             <>
               {task.status === 'running' ? (
                 <button 
-                  onClick={(e) => { e.stopPropagation(); onUpdate(task.id, { status: 'paused' }); }}
+                  onClick={(e) => { e.stopPropagation(); playTimer(); onUpdate(task.id, { status: 'paused' }); }}
                   className="hover:text-highlighter-yellow transition-colors"
                 >
                   <Pause size={20} fill="currentColor" />
                 </button>
               ) : (
                 <button 
-                  onClick={(e) => { e.stopPropagation(); onUpdate(task.id, { status: 'running' }); }}
+                  onClick={(e) => { e.stopPropagation(); playTimer(); onUpdate(task.id, { status: 'running' }); }}
                   className="hover:text-highlighter-yellow transition-colors"
                 >
                   <Play size={20} fill="currentColor" />
@@ -132,6 +134,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExplore
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
+                  playPop();
                   setIsCompleting(true);
                 }}
                 className="hover:text-highlighter-pink transition-colors relative z-10"
@@ -169,6 +172,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExplore
              <div className="flex gap-2">
                <button 
                  onClick={() => {
+                   playSuccess();
                    onUpdate(task.id, { 
                      status: 'completed',
                      actualSatisfaction: completionSatisfaction 
@@ -180,7 +184,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete, onExplore
                  I'm Done!
                </button>
                <button 
-                 onClick={() => setIsCompleting(false)}
+                 onClick={() => { playPop(); setIsCompleting(false); }}
                  className="px-3 py-1 text-ink opacity-50 hover:opacity-100 font-hand text-sm underline"
                >
                  Cancel

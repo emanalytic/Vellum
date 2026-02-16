@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Plus, Lightbulb, ChevronRight, Coffee } from "lucide-react";
 import TaskCard from "../components/tasks/TaskCard";
 import type { Task, TaskPriority } from "../types";
+import { useSound } from "../hooks/useSound";
 
 interface JournalViewProps {
   tasks: Task[];
@@ -32,6 +33,7 @@ const JournalView: React.FC<JournalViewProps> = ({
   isClassifying,
   onTabChange,
 }) => {
+  const { playPop, playClick, playSuccess } = useSound();
   const [showAddForm, setShowAddForm] = useState(false);
   const [deck, setDeck] = useState({
     description: "",
@@ -46,6 +48,7 @@ const JournalView: React.FC<JournalViewProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!deck.description.trim()) return;
+    playSuccess();
     const success = await onAddTask(deck);
     if (success) {
       setDeck({
@@ -70,7 +73,7 @@ const JournalView: React.FC<JournalViewProps> = ({
       <section className="max-w-4xl mx-auto">
         {!showAddForm ? (
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => { playPop(); setShowAddForm(true); }}
             className="w-full py-4 sketch-border bg-white group hover:bg-highlighter-pink/60 transition-all flex flex-col items-center gap-2 border-dashed"
           >
             <Plus
@@ -124,7 +127,7 @@ const JournalView: React.FC<JournalViewProps> = ({
                           <button
                             key={p}
                             type="button"
-                            onClick={() => setDeck({ ...deck, priority: p })}
+                            onClick={() => { playClick(); setDeck({ ...deck, priority: p }); }}
                             className={`flex-1 py-1 px-2 sketch-border font-hand text-lg capitalize transition-all ${
                               deck.priority === p
                                 ? "bg-highlighter-yellow scale-110"
@@ -204,12 +207,13 @@ const JournalView: React.FC<JournalViewProps> = ({
                     type="checkbox"
                     className="hidden"
                     checked={deck.wantsChunks}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      playClick();
                       setDeck({
                         ...deck,
                         wantsChunks: e.target.checked,
-                      })
-                    }
+                      });
+                    }}
                   />
                   <span
                     className={`font-sketch relative text-lg uppercase flex items-center gap-3 py-2 px-4 sketch-border transition-all group/ai-toggle ${
@@ -249,7 +253,7 @@ const JournalView: React.FC<JournalViewProps> = ({
                 <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
                   <button
                     type="button"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => { playPop(); setShowAddForm(false); }}
                     className="flex-1 md:flex-none font-hand text-xl p-2 text-ink-light hover:underline underline-offset-4"
                   >
                     nevermind

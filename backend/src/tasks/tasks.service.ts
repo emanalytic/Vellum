@@ -187,6 +187,7 @@ async findAll(token: string, userId: string) {
     return {
       availableHours: data.available_hours || {},
       autoSchedule: data.auto_schedule || false,
+      soundEnabled: data.sound_enabled ?? true,
     };
   }
 
@@ -197,6 +198,7 @@ async findAll(token: string, userId: string) {
         user_id: userId,
         available_hours: dto.availableHours,
         auto_schedule: dto.autoSchedule,
+        sound_enabled: dto.soundEnabled,
       });
 
     if (error) {

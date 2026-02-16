@@ -1,5 +1,6 @@
 import React from "react";
-import { X, Smile } from "lucide-react";
+import { X, Smile, Volume2 } from "lucide-react";
+import type { UserPreferences } from "../../types";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -10,6 +11,8 @@ interface SettingsModalProps {
     avatar?: string;
   };
   onUpdateProfile: (name: string, avatarUrl: string) => Promise<void>;
+  preferences: UserPreferences;
+  onUpdatePreferences: (prefs: UserPreferences) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -17,6 +20,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   user,
   onUpdateProfile,
+  preferences,
+  onUpdatePreferences,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [name, setName] = React.useState(user.name);
@@ -112,6 +117,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             )}
           </div>
 
+          {/* Preferences Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-dashed border-ink/20 pb-2">
+              <h3 className="font-hand text-xl font-bold flex items-center gap-2">
+                <Volume2 size={20} /> Preferences
+              </h3>
+            </div>
+            
+            <div className="bg-white/50 p-4 rounded sketch-border border-ink/10 flex items-center justify-between group">
+               <div>
+                  <p className="font-hand text-lg">Sound Effects</p>
+                  <p className="text-[10px] font-sketch uppercase opacity-40">Pen clicks and paper rustles</p>
+               </div>
+               
+               <button 
+                  onClick={() => onUpdatePreferences({
+                    ...preferences,
+                    soundEnabled: !preferences.soundEnabled
+                  })}
+                  className={`w-12 h-6 rounded-full relative transition-colors duration-300 border-2 border-ink ${preferences.soundEnabled ? 'bg-highlighter-pink' : 'bg-paper-bg'}`}
+               >
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white border border-ink transition-all duration-300 shadow-sm ${preferences.soundEnabled ? 'left-6' : 'left-0.5'}`} />
+               </button>
+            </div>
+          </div>
 
           <div className="pt-6 text-center">
              <p className="font-hand text-sm opacity-40">

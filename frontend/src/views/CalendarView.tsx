@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Task, UserPreferences } from "../types";
+import { useSound } from "../hooks/useSound";
 import {
   ChevronLeft,
   ChevronRight,
@@ -41,6 +42,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   onScheduleTask,
   onTabChange,
 }) => {
+  const { playClick, playTabs, playPop } = useSound();
   const [view, setView] = useState<"day" | "week">("day");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
@@ -336,24 +338,32 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           </h2>
           <div className="flex gap-4 md:gap-8 mt-4 font-hand text-xl md:text-2xl text-ink-light ml-2">
             <button
-              onClick={() => setView("day")}
-              className={`transition-all pb-1 ${view === "day" ? "text-ink font-bold border-b-4 border-highlighter-pink px-2 scale-110" : "opacity-40 hover:opacity-100"}`}
-            >
-              Daily Focus
-            </button>
-            <button
-              onClick={() => setView("week")}
-              className={`transition-all pb-1 ${view === "week" ? "text-ink font-bold border-b-4 border-highlighter-pink px-2 scale-110" : "opacity-40 hover:opacity-100"}`}
-            >
-              Weekly Flow
-            </button>
+                onClick={() => { playClick(); setView("day"); }}
+                className={`px-4 py-1 font-marker text-sm transition-all ${
+                  view === "day"
+                    ? "bg-ink text-white rotate-1"
+                    : "bg-white text-ink hover:bg-highlighter-yellow/30"
+                }`}
+              >
+                Day
+              </button>
+              <button
+                onClick={() => { playClick(); setView("week"); }}
+                className={`px-4 py-1 font-marker text-sm transition-all ${
+                  view === "week"
+                    ? "bg-ink text-white -rotate-1"
+                    : "bg-white text-ink hover:bg-highlighter-yellow/30"
+                }`}
+              >
+                Week
+              </button>
           </div>
         </div>
 
         {/* Preset Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3 sketch-border shadow-md">
           <button
-            onClick={setNightOwlPreset}
+            onClick={() => { playClick(); setNightOwlPreset(); }}
             className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 sketch-border transition-all text-sm md:text-base ${isNightOwl ? "bg-ink text-white shadow-lg" : "hover:bg-highlighter-yellow bg-white"}`}
           >
             <Moon
@@ -363,7 +373,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             <span className="font-hand text-lg md:text-xl">Night Owl</span>
           </button>
           <button
-            onClick={setEarlyBirdPreset}
+            onClick={() => { playClick(); setEarlyBirdPreset(); }}
             className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 sketch-border transition-all text-sm md:text-base ${!isNightOwl ? "bg-ink text-white shadow-lg" : "hover:bg-highlighter-yellow bg-white"}`}
           >
             <Sun
@@ -377,7 +387,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         {/* Date Nav */}
         <div className="flex items-center justify-between xl:justify-center gap-3 sketch-border bg-white px-4 py-2 shadow-lg -rotate-1 self-center xl:self-auto">
           <button
-            onClick={() => navigateDate(-1)}
+            onClick={() => { playTabs(); navigateDate(-1); }}
             className="p-2 hover:bg-highlighter-pink/20 rounded-full transition-colors"
           >
             <ChevronLeft size={22} />
@@ -396,7 +406,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             </div>
           </div>
           <button
-            onClick={() => navigateDate(1)}
+            onClick={() => { playTabs(); navigateDate(1); }}
             className="p-2 hover:bg-highlighter-pink/20 rounded-full transition-colors"
           >
             <ChevronRight size={22} />
@@ -438,7 +448,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                     return (
                       <div
                         key={`label-${h}`}
-                        onClick={() => handleSlotClick(h)}
+                        onClick={() => { playPop(); handleSlotClick(h); }}
                         className={`relative flex items-start justify-end pr-2 md:pr-3 font-mono text-[9px] md:text-xs font-black border-b border-ink/10 cursor-pointer hover:bg-highlighter-yellow/30 transition-colors ${
                           available
                             ? "text-green-700 bg-green-50/30"
@@ -460,7 +470,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                     return (
                       <div
                         key={`slot-${h}`}
-                        onClick={() => handleSlotClick(h)}
+                        onClick={() => { playPop(); handleSlotClick(h); }}
                         className={`border-b border-ink/10 cursor-pointer transition-colors group relative ${
                           available
                             ? "bg-green-50/30 hover:bg-green-100/40"
@@ -475,6 +485,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              playPop();
                               handleSlotClick(h);
                             }}
                             className="p-1 rounded-full bg-highlighter-yellow hover:scale-110 transition-transform shadow-sm border border-ink/10"
@@ -790,6 +801,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 {/* New Task Button */}
                 <button
                   onClick={() => {
+                    playPop();
                     onAddTaskAtTime?.(currentDate, activeSlot);
                     setActiveSlot(null);
                   }}

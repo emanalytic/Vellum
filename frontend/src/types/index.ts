@@ -41,6 +41,7 @@ export interface Task {
 export interface UserPreferences {
   availableHours: { [key: string]: string[] };
   autoSchedule: boolean;
+  soundEnabled: boolean;
 }
 
 export interface SchedulerResult {
