@@ -14,7 +14,9 @@ import {
   Archive,
   MousePointer2,
   CheckCircle2,
-  Quote
+  Quote,
+  Activity,
+  Star
 } from 'lucide-react';
 
 const GuideView: React.FC = () => {
@@ -51,15 +53,15 @@ const GuideView: React.FC = () => {
              <ul className="space-y-4 font-hand text-base leading-snug">
                <li className="flex items-start gap-3">
                  <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><LayoutDashboard size={14} /></div>
-                 <span><strong>Tasks:</strong> Your main board. This is where you scribble new ideas and manage active work.</span>
+                 <span><strong>Canvas:</strong> Your main board. This is where you scribble new ideas and manage active work.</span>
                </li>
                <li className="flex items-start gap-3">
                  <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><Calendar size={14} /></div>
-                 <span><strong>Calendar:</strong> Your interactive timeline for visualizing the hours ahead.</span>
+                 <span><strong>Timeline:</strong> Your interactive timeline for visualizing the hours ahead.</span>
                </li>
                <li className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><BarChart3 size={14} /></div>
-                 <span><strong>Analytics:</strong> Deep dives into how you're spending your focus time.</span>
+                 <span><strong>Insights:</strong> Deep dives into how you're spending your focus time.</span>
                </li>
                <li className="flex items-start gap-3">
                  <div className="w-6 h-6 rounded bg-ink/5 flex items-center justify-center mt-0.5"><Settings size={14} /></div>
@@ -70,12 +72,12 @@ const GuideView: React.FC = () => {
         </div>
       </section>
 
-      {/* ─── 1. TODAY'S CANVAS ─── */}
+      {/* ─── 1. CANVAS ─── */}
       <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
         <div className="md:text-right sticky top-24 pt-2">
           <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
              <Pencil className="text-highlighter-blue" size={20} />
-             The Canvas
+             Canvas
           </h2>
           <p className="font-hand text-base text-ink/40">Task Management.</p>
         </div>
@@ -84,7 +86,7 @@ const GuideView: React.FC = () => {
            <div className="sketch-border bg-white p-6 relative">
              <h3 className="font-marker text-lg mb-4">Adding a Task</h3>
              <p className="font-hand text-base mb-6 opacity-70">
-               Click the plus button at the top of <strong>Today's Canvas</strong> to begin.
+               Click the plus button at the top of <strong>Canvas</strong> to begin.
              </p>
              <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2 border-l-2 border-highlighter-blue/40 pl-3">
@@ -117,12 +119,12 @@ const GuideView: React.FC = () => {
         </div>
       </section>
 
-      {/* ─── 2. THE BLUEPRINT ─── */}
+      {/* ─── 2. TIMELINE ─── */}
       <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
         <div className="md:text-right sticky top-24 pt-2">
           <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
              <Calendar className="text-highlighter-pink" size={20} />
-             The Blueprint
+             Timeline
           </h2>
           <p className="font-hand text-base text-ink/40">Visual Scheduling.</p>
         </div>
@@ -166,7 +168,7 @@ const GuideView: React.FC = () => {
         </div>
       </section>
 
-      {/* ─── 3. WORKING ─── */}
+      {/* ─── 3. EXECUTION ─── */}
       <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
         <div className="md:text-right sticky top-24 pt-2">
           <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
@@ -207,6 +209,46 @@ const GuideView: React.FC = () => {
                    </div>
                 </li>
              </ul>
+           </div>
+        </div>
+      </section>
+
+      {/* ─── 4. INSIGHTS ─── */}
+      <section className="grid md:grid-cols-[180px_1fr] gap-8 items-start">
+        <div className="md:text-right sticky top-24 pt-2">
+          <h2 className="marker-text text-2xl mb-2 flex md:justify-end items-center gap-2">
+             <Activity className="text-highlighter-pink" size={20} />
+             Insights
+          </h2>
+          <p className="font-hand text-base text-ink/40">Data Visualization.</p>
+        </div>
+        
+        <div className="space-y-6">
+           <div className="sketch-border bg-white p-6 relative">
+             <div className="absolute -bottom-2 -right-2 transform rotate-12 opacity-5"><TrendingUp size={60} /></div>
+             <h3 className="font-marker text-lg mb-4">Your Progress Dashboard</h3>
+             <p className="font-hand text-base mb-6 opacity-70">The Insights tab processes your logs to show you the truth about your productivity.</p>
+             
+             <div className="space-y-6 font-hand text-sm">
+                <div className="flex items-start gap-4">
+                   <div className="w-6 h-6 rounded-full bg-highlighter-yellow/30 flex items-center justify-center mt-0.5 shrink-0"><Lightbulb size={12} /></div>
+                   <div>
+                      <strong>Energy Map:</strong> A 24-hour heat map showing when you are actually most focused. Use this to identify if you're a true Night Owl or Early Bird.
+                   </div>
+                </div>
+                <div className="flex items-start gap-4">
+                   <div className="w-6 h-6 rounded-full bg-highlighter-pink/30 flex items-center justify-center mt-0.5 shrink-0"><Star size={12} /></div>
+                   <div>
+                      <strong>Growth Timeline:</strong> Visualizes your task completion velocity. Watch your "Vault" grow as you master your schedule.
+                   </div>
+                </div>
+                <div className="flex items-start gap-4">
+                   <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5 shrink-0"><CheckCircle2 size={12} className="text-green-600" /></div>
+                   <div>
+                      <strong>Satisfaction Scorecard:</strong> This compares your <em>Predicted</em> vs <em>Actual</em> satisfaction scores. It's the ultimate tool for overcoming the "Emotional Weight" of starting.
+                   </div>
+                </div>
+             </div>
            </div>
         </div>
       </section>
