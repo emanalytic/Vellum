@@ -332,20 +332,20 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-end gap-4 p-4 bg-white sketch-border border-ink shadow-sm">
         <div className="flex flex-col items-center xl:items-start text-center xl:text-left">
           <h2 className="marker-text text-3xl md:text-5xl inline-block px-4 py-1 bg-highlighter-yellow shadow-sketch rotate-1">
-            Schedule
+            The Blueprint
           </h2>
           <div className="flex gap-4 md:gap-8 mt-4 font-hand text-xl md:text-2xl text-ink-light ml-2">
             <button
               onClick={() => setView("day")}
               className={`transition-all pb-1 ${view === "day" ? "text-ink font-bold border-b-4 border-highlighter-pink px-2 scale-110" : "opacity-40 hover:opacity-100"}`}
             >
-              Day View
+              Daily Focus
             </button>
             <button
               onClick={() => setView("week")}
               className={`transition-all pb-1 ${view === "week" ? "text-ink font-bold border-b-4 border-highlighter-pink px-2 scale-110" : "opacity-40 hover:opacity-100"}`}
             >
-              Week View
+              Weekly Flow
             </button>
           </div>
         </div>
@@ -666,7 +666,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 size={20}
                 className="text-highlighter-pink animate-spin-slow"
               />
-              <h3 className="font-marker text-xl md:text-2xl">WORK HOURS</h3>
+              <h3 className="font-marker text-xl md:text-2xl">WIN-DOWS</h3>
             </div>
             <div className="space-y-2 overflow-y-auto max-h-[450px] lg:max-h-none custom-scrollbar">
               {[

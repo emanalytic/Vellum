@@ -23,7 +23,6 @@ import {
   Lightbulb,
   LayoutDashboard,
   Sparkles,
-  Settings,
 } from "lucide-react";
 
 import type { Session } from "@supabase/supabase-js";
@@ -472,7 +471,7 @@ function App() {
       />
 
       {editingTask && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-ink/70 backdrop-blur-md">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-ink/70 backdrop-blur-md">
           <div className="max-w-2xl w-full">
             <div className="sketch-border p-8 bg-white transform -rotate-1 relative shadow-2xl">
               <button
