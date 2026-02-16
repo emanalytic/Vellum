@@ -24,28 +24,23 @@ async function bootstrap() {
       optionsSuccessStatus: 204,
     });
 
-    // Security & Performance Middleware
     app.use(helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
       crossOriginOpenerPolicy: { policy: 'unsafe-none' },
     }));
     app.use(compression());
     
-    // Application Lifecycle
     app.enableShutdownHooks();
     
-    // Validation
     app.useGlobalPipes(new ValidationPipe({ 
       whitelist: true, 
       transform: true,
       forbidNonWhitelisted: true,
     }));
 
-    // Body Parsers
     app.use(json({ limit: '10mb' }));
     app.use(urlencoded({ extended: true, limit: '10mb' }));
-    
-    // Port Configuration
+        
     const port = process.env.PORT ?? 3000;
     
     await app.listen(port, '0.0.0.0');

@@ -1,23 +1,13 @@
 import { useCallback } from 'react';
 
+// Local sound assets located in /public/sounds/
 const SOUNDS = {
-  // Light pen click for general buttons
-  CLICK: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-  
-  // Paper rustle/page flip for navigation
-  TABS: 'https://assets.mixkit.co/active_storage/sfx/255/255-preview.mp3',
-  
-  // Pencil/Pen scribble for completing/adding tasks
-  SCRIBBLE: 'https://assets.mixkit.co/active_storage/sfx/1110/2571-preview.mp3', 
-  
-  // Soft pop for opening modals/menus
-  POP: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
-  
-  // Paper crumble for deleting/archiving
-  CRUMBLE: 'https://cdn.pixabay.com/audio/2022/03/15/audio_7314798a44.mp3',
-  
-  // Subtle pencil tip sound for "Start" timer
-  START: 'https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3',
+  CLICK: '/sounds/click.mp3',      // Pen click
+  TABS: '/sounds/tabs.mp3',        // Paper rustle (Tabs/Navigation)
+  SCRIBBLE: '/sounds/scribble.mp3', // Pencil scribble (Success)
+  POP: '/sounds/pop.mp3',          // Soft pop (Modals)
+  CRUMBLE: '/sounds/crumble.mp3',  // Paper crumble (Delete)
+  START: '/sounds/timer.mp3',      // Timer tick
 };
 
 export const useSound = () => {
@@ -28,7 +18,9 @@ export const useSound = () => {
 
     const audio = new Audio(url);
     audio.volume = volume;
-    audio.play().catch(() => {});
+    audio.play().catch(() => {
+      // Browsers block audio until first user interaction
+    });
   }, []);
 
   return {
