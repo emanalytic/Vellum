@@ -327,7 +327,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({ tasks }) => {
                 </p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart
                   data={activityByHour}
                   margin={{ top: 15, right: 5, left: -25, bottom: 0 }}
@@ -429,7 +429,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({ tasks }) => {
                 </p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <ComposedChart
                   data={completionTimeline}
                   margin={{ top: 15, right: 15, left: -25, bottom: 0 }}

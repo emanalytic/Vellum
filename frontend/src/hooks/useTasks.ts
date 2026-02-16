@@ -75,7 +75,7 @@ export const useTasks = (session: Session | null) => {
         try {
           chunks = await fetchChunks(deck.description, deck.skillLevel);
         } catch (e: any) {
-          if (e.message?.includes("Daily AI limit reached")) {
+          if (e.message?.includes("Daily AI limit reached") || e.message?.includes("(429)")) {
             aiLimitReached = true;
           } else {
             throw e; 

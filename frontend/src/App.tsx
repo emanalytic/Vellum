@@ -482,9 +482,9 @@ function App() {
       />
 
       {editingTask && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-6 bg-ink/70 backdrop-blur-md">
-          <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div className="sketch-border p-8 bg-white transform -rotate-1 relative shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-ink/70 backdrop-blur-md">
+          <div className="max-w-2xl w-full max-h-[85vh] overflow-y-auto custom-scrollbar">
+            <div className="sketch-border p-6 md:p-8 bg-white transform -rotate-1 relative shadow-2xl m-4">
               <button
                 onClick={() => { playPop(); setEditingTaskId(null); }}
                 className="absolute -top-4 -right-4 bg-ink text-white p-2 sketch-border hover:bg-highlighter-pink hover:text-ink transition-all"
