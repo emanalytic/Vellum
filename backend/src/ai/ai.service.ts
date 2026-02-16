@@ -20,6 +20,10 @@ export class AiService {
     this.groq = new Groq({ apiKey });
   }
 
+  private getAdminClient() {
+    return this.supabaseService.getServiceRoleClient();
+  }
+
   async classifyTask(
     dto: ClassifyTaskDto,
     userId: string,
@@ -29,7 +33,8 @@ export class AiService {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const { count, error: countError } = await this.supabaseService.client
+      const adminClient = this.getAdminClient();
+      const { count, error: countError } = await adminClient
         .from('ai_usage')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
@@ -89,7 +94,7 @@ Constraints:
       }
 
       // 2. Record Usage
-      await this.supabaseService.client.from('ai_usage').insert({
+      await adminClient.from('ai_usage').insert({
         user_id: userId,
       });
 
