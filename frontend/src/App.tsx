@@ -140,10 +140,10 @@ function App() {
     } else {
       if (activeTaskId && sessionStartTime) {
         const endTime = new Date().toISOString();
-        const duration = Math.floor(
+        const duration = Math.max(1, Math.floor(
           (new Date(endTime).getTime() - new Date(sessionStartTime).getTime()) /
             1000,
-        );
+        ));
 
         if (duration > 0) {
           handleSaveLog(activeTaskId, {

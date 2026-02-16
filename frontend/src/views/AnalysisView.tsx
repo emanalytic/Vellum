@@ -384,8 +384,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({ tasks }) => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="font-marker text-xl md:text-2xl opacity-70 flex items-center gap-2">
-              <Star size={18} className="text-highlighter-pink" /> Task
-              Completions
+              <Star size={18} className="text-highlighter-pink" /> Output Velocity
             </h3>
             <div className="bg-ink text-white px-2 py-0.5 text-[9px] font-sketch uppercase rotate-1">
               {completedCount} total
