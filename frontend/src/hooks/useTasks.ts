@@ -143,7 +143,9 @@ export const useTasks = (session: Session | null) => {
         const taskToUpdate = tasksRef.current.find(t => t.id === id);
         if (taskToUpdate) {
           const finalTask = { ...taskToUpdate, ...updates };
-          await api.upsertTask(finalTask);
+          // Sanitize: 'instances' is a read-only view from backend, not part of UpsertDto
+          const { instances, ...cleanTask } = finalTask as any; 
+          await api.upsertTask(cleanTask);
         }
       } catch (e: any) {
         console.error("Update error:", e);
