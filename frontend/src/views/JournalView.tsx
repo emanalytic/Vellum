@@ -141,7 +141,7 @@ const JournalView: React.FC<JournalViewProps> = ({
                 <div className="space-y-6">
                   <div className="flex flex-col">
                     <label className="font-sketch text-xs uppercase opacity-40 ml-1">
-                      Deadline Goal
+                      Deadline
                     </label>
                     <input
                       type="datetime-local"
@@ -266,7 +266,7 @@ const JournalView: React.FC<JournalViewProps> = ({
                       "Analyzing..."
                     ) : (
                       <>
-                        log{" "}
+                        Save Task{" "}
                         <ChevronRight className="group-hover:translate-x-2 transition-transform" />
                       </>
                     )}

@@ -23,6 +23,7 @@ import {
   Lightbulb,
   LayoutDashboard,
   Sparkles,
+  Settings,
 } from "lucide-react";
 
 import type { Session } from "@supabase/supabase-js";

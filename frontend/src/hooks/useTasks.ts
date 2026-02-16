@@ -103,7 +103,7 @@ export const useTasks = (session: Session | null) => {
       if (aiLimitReached) {
         showToast("Task saved manually. (Daily AI limit reached)", "success");
       } else {
-        showToast("Task scribbled down!", "success");
+        showToast("Task added!", "success");
       }
       return newTask;
     } catch (e: any) {

@@ -64,7 +64,7 @@ const ArchiveView: React.FC<ArchiveViewProps> = ({ tasks, onDelete }) => {
         />
         <input
           type="text"
-          placeholder="Summon a past pursuit..."
+          placeholder="Search past tasks..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-12 pr-4 py-4 sketch-border bg-white font-hand text-2xl focus:outline-none focus:bg-highlighter-yellow/5"

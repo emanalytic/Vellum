@@ -157,12 +157,7 @@ async findAll(token: string, userId: string) {
   }
 
   async removeChunk(token: string, userId: string, chunkId: string) {
-    // First verify the chunk belongs to a task owned by the user
     const client = this.getClient(token);
-    
-    // We can join or just use a subquery/check. 
-    // Simplified: common practice in Supabase is to let RLS handle it, 
-    // but here we are in a service layer.
     const { error } = await client
       .from('chunks')
       .delete()
