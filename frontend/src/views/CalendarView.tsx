@@ -544,10 +544,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                             >
                               {inst.description}
                             </p>
+                            {!isTiny && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeleteTask?.(inst.id);
+                                }}
+                                className="opacity-0 group-hover/task:opacity-100 p-0.5 hover:text-highlighter-pink transition-opacity shrink-0"
+                              >
+                                <X size={isCompact ? 10 : 14} />
+                              </button>
+                            )}
                             {!isTiny && inst._maxCol <= 2 && (
                               <Clock
                                 size={isCompact ? 9 : 12}
-                                className="text-ink/20 group-hover/task:text-highlighter-pink transition-colors shrink-0 mt-0.5"
+                                className="text-ink/20 group-hover/task:text-highlighter-pink transition-colors shrink-0 mt-0.5 ml-1"
                               />
                             )}
                           </div>
@@ -647,7 +658,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                         <div
                           key={inst.instanceId}
                           onClick={() => onTaskClick?.(inst)}
-                          className={`p-2.5 sketch-border bg-white text-xs shadow-sm hover:scale-[1.03] transition-transform cursor-pointer border-l-[6px] ${
+                          className={`p-2.5 sketch-border bg-white text-xs shadow-sm hover:scale-[1.03] transition-transform cursor-pointer border-l-[6px] group ${
                             inst.priority === "high"
                               ? "border-l-highlighter-pink"
                               : inst.priority === "medium"
@@ -662,9 +673,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (window.confirm("Abandon this task?")) {
-                                  onDeleteTask?.(inst.id);
-                                }
+                                onDeleteTask?.(inst.id);
                               }}
                               className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-highlighter-pink transition-opacity"
                             >
