@@ -75,9 +75,9 @@ export const useTasks = (session: Session | null) => {
         } catch (e: any) {
           if (e.message?.includes("Daily AI limit reached")) {
             aiLimitReached = true;
-            showToast(e.message, "info");
+            // We'll show a combined message at the end
           } else {
-            throw e; // Re-throw other errors
+            throw e; 
           }
         }
       }
@@ -101,7 +101,7 @@ export const useTasks = (session: Session | null) => {
       setTasks(prev => [newTask, ...prev]);
       
       if (aiLimitReached) {
-        showToast("Task saved! (But couldn't add AI chunks today).", "success");
+        showToast("Task saved manually. (Daily AI limit reached)", "success");
       } else {
         showToast("Task scribbled down!", "success");
       }
@@ -171,13 +171,32 @@ export const useTasks = (session: Session | null) => {
       } else {
         showToast("AI couldn't find any logical steps to add.", "info");
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("AI breakdown error:", e);
-      showToast("AI is a bit confused. Try again?", "error");
+      const message = e.message?.includes("Daily AI limit reached")
+        ? "Cannot expand: Daily AI limit reached (3/3)."
+        : "AI service is temporarily unavailable. Try again?";
+      showToast(message, "error");
     } finally {
       setIsClassifying(false);
     }
   }, [fetchChunks, updateTask, showToast]);
+
+  const deleteChunk = useCallback(async (taskId: string, chunkId: string) => {
+    const task = tasksRef.current.find(t => t.id === taskId);
+    if (!task || !task.chunks) return;
+
+    if (session) {
+      try {
+        await api.deleteChunk(chunkId);
+        const newChunks = task.chunks.filter(c => c.id !== chunkId);
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, chunks: newChunks } : t));
+      } catch (e) {
+        console.error("Delete chunk error:", e);
+        showToast("Ink ran out. Couldn't delete chunk.", "error");
+      }
+    }
+  }, [session, showToast]);
 
   const updateChunk = useCallback(async (taskId: string, chunkId: string, updates: Partial<TaskChunk>) => {
     const task = tasksRef.current.find(t => t.id === taskId);
@@ -202,13 +221,6 @@ export const useTasks = (session: Session | null) => {
     await updateTask(taskId, { chunks: newChunks });
   }, [updateTask]);
 
-  const deleteChunk = useCallback(async (taskId: string, chunkId: string) => {
-    const task = tasksRef.current.find(t => t.id === taskId);
-    if (!task || !task.chunks) return;
-
-    const newChunks = task.chunks.filter(c => c.id !== chunkId);
-    await updateTask(taskId, { chunks: newChunks });
-  }, [updateTask]);
 
   const handleSaveLog = useCallback(async (taskId: string, log: TaskHistory) => {
     if (!session) return;

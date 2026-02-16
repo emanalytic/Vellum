@@ -35,6 +35,11 @@ export class TasksController {
     return this.tasksService.remove(this.extractToken(req), req.user.id, id);
   }
 
+  @Delete('chunk/:chunkId')
+  removeChunk(@Req() req: any, @Param('chunkId') chunkId: string) {
+    return this.tasksService.removeChunk(this.extractToken(req), req.user.id, chunkId);
+  }
+
   @Post('log/:taskId')
   logProgress(
     @Req() req: any,

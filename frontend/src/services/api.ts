@@ -53,6 +53,15 @@ export const api = {
     });
     await assertOk(res, "Failed to delete task");
   },
+  
+  async deleteChunk(chunkId: string) {
+    const headers = await getHeaders();
+    const res = await fetch(`${API_URL}/tasks/chunk/${chunkId}`, {
+      method: "DELETE",
+      headers,
+    });
+    await assertOk(res, "Failed to delete chunk");
+  },
 
   async createProgressLog(taskId: string, log: TaskHistory) {
     const headers = await getHeaders();

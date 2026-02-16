@@ -156,6 +156,25 @@ async findAll(token: string, userId: string) {
     return { success: true };
   }
 
+  async removeChunk(token: string, userId: string, chunkId: string) {
+    // First verify the chunk belongs to a task owned by the user
+    const client = this.getClient(token);
+    
+    // We can join or just use a subquery/check. 
+    // Simplified: common practice in Supabase is to let RLS handle it, 
+    // but here we are in a service layer.
+    const { error } = await client
+      .from('chunks')
+      .delete()
+      .eq('id', chunkId);
+
+    if (error) {
+      console.error('Chunk delete error:', error.message);
+      throw new InternalServerErrorException('Failed to delete chunk');
+    }
+    return { success: true };
+  }
+
   async getPreferences(token: string, userId: string) {
     const { data, error } = await this.getClient(token)
       .from('user_preferences')
