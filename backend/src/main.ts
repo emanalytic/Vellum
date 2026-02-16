@@ -15,9 +15,8 @@ async function bootstrap() {
       bufferLogs: false,
     });
 
-    // CORS Configuration — MUST be before helmet/other middleware
     app.enableCors({
-      origin: true, // Temporarily allow all for debugging
+      origin: true,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       allowedHeaders: '*',
       credentials: true,
@@ -39,11 +38,11 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe({ 
       whitelist: true, 
       transform: true,
-      forbidNonWhitelisted: true, // stricter validation
+      forbidNonWhitelisted: true,
     }));
 
     // Body Parsers
-    app.use(json({ limit: '10mb' })); // Increased limit slightly for larger payloads if needed
+    app.use(json({ limit: '10mb' }));
     app.use(urlencoded({ extended: true, limit: '10mb' }));
     
     // Port Configuration
