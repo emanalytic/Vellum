@@ -11,6 +11,9 @@ export class AiController {
   @Post('classify-task')
   async classifyTask(@Body() dto: ClassifyTaskDto, @Req() req: any) {
     const userId = req.user.id;
-    return this.aiService.classifyTask(dto, userId);
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
+    
+    return this.aiService.classifyTask(dto, userId, token);
   }
 }
