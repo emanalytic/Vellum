@@ -111,6 +111,11 @@ export class SchedulerService {
           const slotStart = candidate.time;
           const slotEnd = new Date(slotStart.getTime() + durationMins * 60000);
 
+          if (task.deadline) {
+            const deadlineDate = new Date(task.deadline).getTime();
+            if (slotEnd.getTime() > deadlineDate) continue;
+          }
+
           const { end: windowEnd } = this.getAvailableWindow(slotStart, preferences, clientTz);
           if (slotEnd.getTime() > windowEnd.getTime()) continue;
 

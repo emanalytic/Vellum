@@ -91,17 +91,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const allScheduledInstances = useMemo(() => {
     const instances: any[] = [];
     tasks.forEach(task => {
-      if (task.scheduledStart && task.scheduledEnd) {
-        instances.push({
-          ...task,
-          instanceId: `legacy-${task.id}`,
-          start: task.scheduledStart,
-          end: task.scheduledEnd,
-          instStatus: task.status
-        });
-      }
-
-      if (task.instances) {
+      // Prioritize new multi-instance records
+      if (task.instances && task.instances.length > 0) {
         task.instances.forEach(inst => {
           instances.push({
             ...task,
@@ -110,6 +101,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             end: inst.end,
             instStatus: inst.status
           });
+        });
+      } 
+      // Fallback to legacy single-date schedule ONLY if no instances exist
+      else if (task.scheduledStart && task.scheduledEnd) {
+        instances.push({
+          ...task,
+          instanceId: `legacy-${task.id}`,
+          start: task.scheduledStart,
+          end: task.scheduledEnd,
+          instStatus: task.status
         });
       }
     });
