@@ -126,7 +126,21 @@ async findAll(token: string, userId: string) {
   }
 
   async remove(token: string, userId: string, id: string) {
-    const { error } = await this.getClient(token)
+    const client = this.getClient(token);
+
+    // Clean up all child records before deleting the task
+    const [instancesResult, logsResult, chunksResult] = await Promise.all([
+      client.from('task_instances').delete().eq('task_id', id).eq('user_id', userId),
+      client.from('progress_logs').delete().eq('task_id', id).eq('user_id', userId),
+      client.from('chunks').delete().eq('task_id', id),
+    ]);
+
+    if (instancesResult.error) console.error('Delete instances error:', instancesResult.error.message);
+    if (logsResult.error) console.error('Delete logs error:', logsResult.error.message);
+    if (chunksResult.error) console.error('Delete chunks error:', chunksResult.error.message);
+
+    // Now delete the task itself
+    const { error } = await client
       .from('tasks')
       .delete()
       .eq('id', id)

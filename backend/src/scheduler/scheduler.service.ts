@@ -51,12 +51,9 @@ export class SchedulerService {
     });
 
     const existingSlots = this.buildTimeSlots(tasks.flatMap(t => t.instances || []));
-    const peakHours = this.buildPeakHoursMap(tasks);
-    
-    // Track actual failures
-    let actualFailures = 0;
+    const peakHours = this.buildPeakHoursMap(tasks, clientTz);
 
-    const scheduled = this.fastSchedule(
+    const { scheduled, unschedulableTasks } = this.fastSchedule(
       activeTasks,
       existingSlots,
       peakHours,
@@ -64,14 +61,14 @@ export class SchedulerService {
       clientTz,
       now,
       daysToSchedule,
-      (count) => { actualFailures += count; }
     );
 
     await this.tasksService.bulkInsertInstances(token, userId, scheduled);
 
     return {
       scheduledCount: scheduled.length,
-      unschedulableCount: actualFailures,
+      unschedulableCount: unschedulableTasks.length,
+      unschedulableTasks,
       schedule: scheduled,
     };
   }
@@ -84,12 +81,13 @@ export class SchedulerService {
     }));
   }
 
-  private buildPeakHoursMap(tasks: any[]): number[] {
+  private buildPeakHoursMap(tasks: any[], tz: string): number[] {
     const hours = new Array(24).fill(0);
     for (const task of tasks) {
       for (const log of task.history || []) {
         if (log.startTime) {
-          hours[new Date(log.startTime).getHours()]++;
+          const h = this.getHourInTz(new Date(log.startTime).getTime(), tz);
+          hours[h]++;
         }
       }
     }
@@ -104,15 +102,17 @@ export class SchedulerService {
     tz: string,
     now: number,
     days: number,
-    onFail: (count: number) => void,
-  ): any[] {
+  ): { scheduled: any[]; unschedulableTasks: string[] } {
     const scheduled: any[] = [];
     const occupiedSlots: TimeSlot[] = [...existingSlots];
     const taskSlots = new Map<string, number[]>();
 
     const dayWindows = this.precomputeDayWindows(now, days, preferences, tz);
-    const hasPeakData = peakHours.reduce((a, b) => a + b, 0) > 60;
+    const hasPeakData = peakHours.reduce((a, b) => a + b, 0) > 0;
     const scoreMap = this.buildScoreMap(peakHours, hasPeakData);
+
+    // Track which tasks got at least one session placed
+    const tasksWithPlacements = new Set<string>();
 
     for (const task of tasks) {
       const duration = this.parseDuration(task.estimatedTime) * 60000;
@@ -122,6 +122,11 @@ export class SchedulerService {
       const taskTimes = taskSlots.get(task.id) || [];
       const existingForTask = existingSlots.filter(s => s.taskId === task.id).map(s => s.start);
       taskTimes.push(...existingForTask);
+
+      // If this task already had existing instances, it's not "unschedulable"
+      if (existingForTask.length > 0) {
+        tasksWithPlacements.add(task.id);
+      }
 
       for (let day = 0; day < days; day++) {
         const window = dayWindows[day];
@@ -133,9 +138,6 @@ export class SchedulerService {
         let placedToday = existingToday;
 
         if (placedToday < repsPerDay) {
-          const sessionsNeededThisDay = repsPerDay - placedToday;
-          let sessionsActuallyPlaced = 0;
-
           const candidates = this.generateScoredCandidates(
             window.start,
             window.end,
@@ -169,11 +171,7 @@ export class SchedulerService {
             });
 
             placedToday++;
-            sessionsActuallyPlaced++;
-          }
-
-          if (sessionsActuallyPlaced < sessionsNeededThisDay) {
-            onFail(sessionsNeededThisDay - sessionsActuallyPlaced);
+            tasksWithPlacements.add(task.id);
           }
         }
 
@@ -181,7 +179,12 @@ export class SchedulerService {
       }
     }
 
-    return scheduled;
+    // Only tasks that got ZERO placements anywhere are truly unschedulable
+    const unschedulableTasks = tasks
+      .filter(t => !tasksWithPlacements.has(t.id))
+      .map(t => t.description || t.id);
+
+    return { scheduled, unschedulableTasks };
   }
 
   private precomputeDayWindows(
@@ -194,17 +197,19 @@ export class SchedulerService {
     const DAY_MS = 86400000;
     
     for (let i = 0; i < days; i++) {
-      const date = new Date(now + i * DAY_MS);
-      const dayName = this.getDayName(date, tz);
-      const hostHours = preferences.availableHours[dayName] || ['09:00', '17:00'];
-      const [startH, startM, endH, endM] = this.parseTimeRange(hostHours);
+        // Use a date that is clearly in the user's i-th day
+        // date.getDay() or getDayName needs to be consistent
+        const date = new Date(now + i * DAY_MS);
+        const dayName = this.getDayName(date, tz);
+        const hostHours = preferences.availableHours[dayName] || ['09:00', '17:00'];
+        const [startH, startM, endH, endM] = this.parseTimeRange(hostHours);
 
-      const start = this.getTimestamp(date, startH, startM, tz);
-      let end = this.getTimestamp(date, endH, endM, tz);
-      
-      if (end <= start) end += DAY_MS;
+        const start = this.getTimestamp(date, startH, startM, tz);
+        let end = this.getTimestamp(date, endH, endM, tz);
+        
+        if (end <= start) end += DAY_MS;
 
-      windows.push({ start, end, day: dayName });
+        windows.push({ start, end, day: dayName });
     }
 
     return windows;
@@ -230,7 +235,7 @@ export class SchedulerService {
 
     while (time < end) {
       if (time > now) {
-        const hour = new Date(time).getHours(); 
+        const hour = this.getHourInTz(time, tz);
         candidates.push({
           time,
           score: scoreMap.get(hour) || 0,
@@ -263,6 +268,18 @@ export class SchedulerService {
     return [sh, sm, eh, em];
   }
 
+  private getHourInTz(timestamp: number, tz: string): number {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: 'numeric',
+      hour12: false,
+    }).formatToParts(new Date(timestamp));
+    const hStr = parts.find(p => p.type === 'hour')?.value || '0';
+    let h = parseInt(hStr, 10);
+    if (h === 24) h = 0;
+    return h;
+  }
+
   private getTimestamp(date: Date, hour: number, minute: number, tz: string): number {
     const formatter = new Intl.DateTimeFormat('en-US', { 
       timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' 
@@ -277,10 +294,7 @@ export class SchedulerService {
     const tempUtc = new Date(targetIso + 'Z');
     
     // Calculate the drift by checking what hour that UTC timestamp represents in the target TZ
-    const checkParts = new Intl.DateTimeFormat('en-US', { 
-      timeZone: tz, hour: 'numeric', hour12: false 
-    }).formatToParts(tempUtc);
-    const checkHour = parseInt(checkParts.find(p => p.type === 'hour')?.value || '0');
+    const checkHour = this.getHourInTz(tempUtc.getTime(), tz);
     
     const diff = hour - checkHour;
     return tempUtc.getTime() + diff * 3600000;
@@ -308,4 +322,5 @@ export class SchedulerService {
     
     return total || this.DEFAULT_DURATION_MINUTES;
   }
+
 }

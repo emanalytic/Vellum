@@ -58,5 +58,6 @@ export interface UserPreferences {
 export interface SchedulerResult {
   scheduledCount: number;
   unschedulableCount: number;
+  unschedulableTasks?: string[];
   schedule: { taskId: string; start: string; end: string }[];
 }

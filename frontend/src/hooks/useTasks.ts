@@ -77,7 +77,6 @@ export const useTasks = (session: Session | null) => {
         } catch (e: any) {
           if (e.message?.includes("Daily AI limit reached")) {
             aiLimitReached = true;
-            // We'll show a combined message at the end
           } else {
             throw e; 
           }
@@ -251,20 +250,21 @@ export const useTasks = (session: Session | null) => {
       const result = await api.runSmartSchedule();
       await fetchTasks();
       if (result.scheduledCount > 0) {
-        showToast("Schedule refined!", "success");
+        showToast(`Scheduled ${result.scheduledCount} session${result.scheduledCount > 1 ? 's' : ''}!`, "success");
       } else {
-        showToast("Schedule updated.", "info");
+        showToast("No new sessions to schedule.", "info");
       }
       if (result.unschedulableCount > 0) {
-        showToast(`Heads up: ${result.unschedulableCount} tasks couldn't fit.`, "info");
+        const names = result.unschedulableTasks?.join(', ') || `${result.unschedulableCount} task(s)`;
+        showToast(`Couldn't fit: ${names}`, "info");
       }
     } catch (e) {
       console.error("Scheduling error:", e);
-      showToast("AI is a bit overwhelmed. Try again?", "error");
+      showToast("The scheduler is overwhelmed. Try again?", "error");
     } finally {
       setIsScheduling(false);
     }
-  }, [session, showToast]);
+  }, [session, showToast, fetchTasks]);
 
   return {
     tasks,
