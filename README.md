@@ -4,6 +4,8 @@ Vellum is a comprehensive productivity system designed to help you plan, execute
 
 The name Vellum refers to the high-quality parchment used for historical manuscripts. This choice reflects the application's purpose: to serve as a premium, durable workspace for your most significant projects.
 
+![Alt text](https://github.com/emanalytic/Vellum/blob/main/image.png)
+
 ## Overview
 
 Traditional productivity tools often fail because they treat all tasks as equal and ignore the user's energy levels. Vellum addresses this by introducing an intelligent layer between your task list and your calendar. It understands that productivity is limited not just by time, but by mental energy.
