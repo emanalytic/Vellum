@@ -1,158 +1,120 @@
 # Vellum
 
-Vellum is an intelligent productivity system designed for students and learners. Unlike traditional task schedulers that only list what you need to do, Vellum helps you manage the entire process of completing a goal.
+Vellum is a comprehensive productivity system designed to help you plan, execute, and analyze your work. It is built for students, researchers, and professionals who need more than a simple to-do list.
 
-When you add a task, the application uses AI to analyze its complexity and automatically breaks it down into smaller, actionable steps called chunks. This prevents you from feeling overwhelmed by large objectives. Vellum also features a smart scheduler that helps you organize these tasks into your day while respecting your natural energy peaks and available time.
+The name Vellum refers to the high-quality parchment used for historical manuscripts. This choice reflects the application's purpose: to serve as a premium, durable workspace for your most significant projects.
 
----
+## Overview
 
-![alt text](image.png)
+Traditional productivity tools often fail because they treat all tasks as equal and ignore the user's energy levels. Vellum addresses this by introducing an intelligent layer between your task list and your calendar. It understands that productivity is limited not just by time, but by mental energy.
 
-## Features
+The system helps you by:
 
-### AI Task Management
+1.  **Breaking down large goals** into manageable steps using artificial intelligence.
+2.  **Scheduling tasks automatically** based on when you are most productive.
+3.  **Tracking your focus** to provide insights into your work habits.
 
-- The application uses AI to analyze how complex a task is.
-- It can automatically break down large goals into smaller, actionable steps.
-- The app estimates the time needed for tasks based on your experience level.
+## Key Features
 
-### Schedule Management
+### Intelligent Task Management
 
-- Users can manage their tasks using a daily or weekly planner.
-- It includes a drag-and-drop system for organizing tasks.
-- You can set your preferred working hours, such as morning or evening.
-- The system helps identify and manage overlapping tasks in your schedule.
+When you add a complex task, Vellum can automatically analyze it and break it down into smaller, actionable sub-tasks. It estimates the difficulty and time required for each step, allowing you to start working immediately without being overwhelmed by the scale of the project.
 
-### Focus Tools
+### Smart Scheduling
 
-- A timer helps you track your work sessions.
-- The application automatically logs the time you spend on each task.
-- You can see your progress through visual bars and markers for finished tasks.
+The application takes your list of tasks and automatically arranges them into your daily schedule. It respects your defined working hours and avoids scheduling conflicting appointments. The interface supports drag-and-drop adjustments, giving you full control over the final plan.
 
-### Insights and Analytics
+### Focus and Execution
 
-- The app provides charts that show your peak productivity times and focus distribution.
-- It includes tools for reviewing your progress every day or week.
+Vellum includes a built-in focus timer that tracks your work sessions. This eliminates the need for external time-tracking tools and ensures that your productivity data is captured accurately within the system.
 
----
+### Performance Analytics
 
-## Project Structure
+The application provides detailed insights into your work patterns:
 
-```
-vellum/
-├── backend/                # API and server logic
-│   ├── src/
-│   │   ├── ai/             # AI processing
-│   │   ├── auth/           # Authentication
-│   │   ├── scheduler/      # Scheduling logic
-│   │   ├── supabase/       # Database connection
-│   │   ├── tasks/          # Task management
-│   │   ├── app.module.ts   # Root module
-│   │   └── main.ts         # Entry point
-│   └── test/               # Tests
-│
-├── frontend/               # Client application
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── common/     # Reusable components
-│   │   │   ├── layout/     # Page layouts
-│   │   │   └── tasks/      # Task-related components
-│   │   ├── context/        # Application state
-│   │   ├── hooks/          # Shared logic
-│   │   ├── pages/          # Authentication pages
-│   │   ├── services/       # API clients
-│   │   ├── views/          # Main application views
-│   │   └── types/          # TypeScript definitions
-│   └── index.css           # Global styles
-```
+- **Focus Distribution**: Visualizes how much time you spend on different types of tasks.
+- **Velocity Tracking**: Monitors your completion rate to help you predict future performance.
+- **Energy Mapping**: identifies your peak productivity hours based on historical data.
 
----
+## deeply Integrated Scheduler
 
-## Technical Information
+The core innovation in Vellum is its scheduling engine, which automates the planning process. This system follows a specific logic to ensure your day is balanced and productive.
 
-### Frontend
+### 1. Prioritization
 
-- Framework: React 19 and Vite
-- Styling: Tailwind CSS
-- Animation: Framer Motion
-- Icons: Lucide React
-- Charts: Recharts
-- Database and Authentication: Supabase
+Before scheduling begins, the engine ranks every active task. It considers the deadline and the priority level (High, Medium, or Low) you have assigned. Tasks that are urgent or high-priority are placed at the front of the queue to ensure they are scheduled first.
 
-### Backend
+### 2. Energy Profiling
 
-- Framework: NestJS
-- Language: TypeScript
-- Database: Supabase (PostgreSQL)
-- AI: OpenAI + Llama 3
+Vellum does not simply fill empty time slots. It analyzes your past work sessions to build an "Energy Profile." This profile identifies the times of day when you are historically most focused and productive.
 
----
+### 3. Adaptive Placement
+
+The scheduler uses your Energy Profile to make intelligent decisions:
+
+- **High-Difficulty Tasks**: These are placed during your peak energy hours.
+- **Routine Tasks**: These are scheduled during your lower-energy periods.
+  This ensures that you are doing the right work at the right time.
+
+### 4. Workload Balancing
+
+To prevent burnout, the system enforces spacing between intensive tasks. It avoids placing too many difficult tasks back-to-back and ensures that your schedule includes necessary buffers. If a task cannot fit into the current day without violating these rules, it is automatically moved to the next available slot.
+
+## Technical Technology Stack
+
+### Frontend Application
+
+- **React 19**: The core framework for the user interface.
+- **TypeScript**: Ensures code safety and reliability.
+- **Tailwind CSS**: Provides a custom, responsive design system.
+- **Framer Motion**: Handles smooth transitions and interactions.
+- **Recharts**: Renders the analytics and data visualizations.
+
+### Backend Services
+
+- **NestJS**: A progressive Node.js framework for building efficient server-side applications.
+- **Supabase**: Provides the PostgreSQL database and authentication services.
+- **OpenAI & Llama 3**: Powers the artificial intelligence features for task analysis and breakdown.
 
 ## Getting Started
 
-### Requirements
+### Prerequisites
+
+To run Vellum locally, you will need:
 
 - Node.js (version 18 or higher)
-- npm or pnpm
 - A Supabase account and project
-- A OpenAI API key
+- An OpenAI API key
 
-### 1. Clone the Repository
+### Installation Instructions
 
-```bash
-git clone https://github.com/yourusername/vellum.git
-cd vellum
-```
+1.  **Clone the Repository**
 
-### 2. Backend Setup
+    ```bash
+    git clone https://github.com/emanalytic/vellum.git
+    cd vellum
+    ```
 
-Go to the backend folder and install the dependencies:
+2.  **Backend Configuration**
+    Navigate to the backend directory and install the required dependencies:
 
-```bash
-cd backend
-npm install
-```
+    ```bash
+    cd backend
+    npm install
+    # Create a .env file with your credentials (PORT, SUPABASE_URL, etc.)
+    npm run start:dev
+    ```
 
-Create a `.env` file in the `backend` folder with these settings:
+3.  **Frontend Configuration**
+    Open a new terminal window, navigate to the frontend directory, and install dependencies:
+    ```bash
+    cd ../frontend
+    npm install
+    # Create a .env file with your credentials (VITE_SUPABASE_URL, etc.)
+    npm run dev
+    ```
 
-```env
-PORT=3000
-CORS_ORIGIN=http://localhost:5173
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_groq_api_key
-```
-
-Start the backend server:
-
-```bash
-npm run start:dev
-```
-
-### 3. Frontend Setup
-
-Open a new terminal, go to the frontend folder, and install the dependencies:
-
-```bash
-cd frontend
-npm install
-```
-
-Create a `.env` file in the `frontend` folder with these settings:
-
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_API_URL=http://localhost:3000
-```
-
-Start the frontend server:
-
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:5173`.
+The application will be accessible at `http://localhost:5173`.
 
 ---
 
